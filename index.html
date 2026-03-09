@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <h1>Sudoku</h1>
+
+  <div id="toolbar">
+
+    <!-- Ligne 1 : partie / sauvegarde / minuterie -->
+    <div class="toolbar-row">
+
+      <button onclick="nouvelleGrille()">Nouvelle</button>
+
+      <button id="btnValider" onclick="validerGrilleDepart()">
+        Valider grille
+      </button>
+
+      <button onclick="sauverPartie()">Save</button>
+
+      <button onclick="document.getElementById('fileLoader').click()">
+        Load
+      </button>
+
+      <input
+        type="file"
+        id="fileLoader"
+        accept=".json"
+        style="display:none"
+        onchange="chargerPartie(event)"
+      >
+
+      <span id="infoMode" style="display:none; margin-left:12px; font-weight:bold;">
+        Mode Jeu
+      </span>
+
+      <span id="timer" style="margin-left:12px; font-weight:bold;">
+        00:00
+      </span>
+
+      <button id="btnTimer" onclick="toggleTimer()">Pause</button>
+
+      <span id="nomPartie" style="margin-left:15px; font-weight:bold;">
+        Partie : sudoku
+      </span>
+
+    </div>
+
+    <!-- Ligne 2 : outils -->
+    <div class="toolbar-row">
+
+      <button onclick="undo()">Undo</button>
+
+      <button onclick="effacerBouton()">Effacer</button>
+
+      <button id="btnCandidat" onclick="toggleModeCandidat()">
+        Candidats : OFF
+      </button>
+
+      <button onclick="creerCandidatsSelection()">
+        Cands sélection
+      </button>
+
+      <button onclick="creerTousCandidats()">
+        Tous cands
+      </button>
+
+      <button onclick="colorerSelection()">
+        Colorer cellules
+      </button>
+
+    </div>
+
+    <!-- Ligne 3 : couleurs -->
+    <div class="toolbar-row">
+
+      <label>
+        Couleur candidats
+        <input
+          type="color"
+          value="#808080"
+          onchange="couleurCandidat=this.value;dessinerTout()"
+        >
+      </label>
+
+      <label>
+        Couleur sélection
+        <input
+          type="color"
+          value="#ffc8c8"
+          onchange="couleurSelection=this.value;dessinerTout()"
+        >
+      </label>
+
+      <label>
+        Couleur cellules
+        <input
+          type="color"
+          value="#ffcccc"
+          onchange="couleurCellule=this.value"
+        >
+      </label>
+
+    </div>
+
+  </div>
+
+  <br>
+
+  <div id="jeu">
+    <canvas id="sudokuCanvas"></canvas>
+
+    <div id="clavier">
+      <button onclick="toucheBouton(1)">1</button>
+      <button onclick="toucheBouton(2)">2</button>
+      <button onclick="toucheBouton(3)">3</button>
+
+      <button onclick="toucheBouton(4)">4</button>
+      <button onclick="toucheBouton(5)">5</button>
+      <button onclick="toucheBouton(6)">6</button>
+
+      <button onclick="toucheBouton(7)">7</button>
+      <button onclick="toucheBouton(8)">8</button>
+      <button onclick="toucheBouton(9)">9</button>
+
+      <button class="effacer" onclick="effacerBouton()">⌫</button>
+    </div>
+  </div>
+
+  <script src="sudoku.js"></script>
+
+</body>
+</html>
