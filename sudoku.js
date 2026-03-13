@@ -509,6 +509,20 @@ function nouvelleGrille() {
     afficherNomPartie();
 }
 
+function effacerCands() {
+    let cellules = getCellsSelectionnees();
+
+    cellules.forEach(({ l, c }) => {
+        if (grilleFixe[l][c]) return;
+
+        // grille[l][c] = 0;
+        grilleCand[l][c] = [];
+    });
+
+    verifierGrille();
+    dessinerTout();
+}
+
 function effacer() {
     let cellules = getCellsSelectionnees();
 
@@ -527,6 +541,12 @@ function effacerBouton() {
     sauverEtat();
     effacer();
 }
+
+function effacerBoutonCands() {
+    sauverEtat();
+    effacerCands();
+}
+
 
 // =====================================================
 // CANDIDATS
