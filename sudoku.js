@@ -396,6 +396,7 @@ function chargerPartie(event) {
     reader.readAsText(file);
     event.target.value = "";
     statsSolveur = data.statsSolveur ?? null;
+    mettreAJourClavier();
 }
 
 function afficherNomPartie() {
@@ -504,6 +505,7 @@ function nouvelleGrille() {
     ajusterCanvas();
     dessinerTout();
     reinitialiserTimer();
+    mettreAJourClavier();
 
     nomSauvegarde = "sudoku";
     afficherNomPartie();
@@ -710,6 +712,27 @@ function verifierGrille() {
     }
 }
 
+function mettreAJourClavier() {
+    const clavier = document.getElementById("clavier");
+    const btn = document.getElementById("btnCandidatClavier");
+
+    if (!clavier || !btn) return;
+
+    if (modeCandidat) {
+        clavier.classList.remove("mode-chiffre");
+        clavier.classList.add("mode-candidat");
+
+        btn.classList.remove("inactif");
+        btn.classList.add("actif");
+    } else {
+        clavier.classList.remove("mode-candidat");
+        clavier.classList.add("mode-chiffre");
+
+        btn.classList.remove("actif");
+        btn.classList.add("inactif");
+    }
+}
+
 // =====================================================
 // ACTIONS UTILISATEUR
 // =====================================================
@@ -767,9 +790,7 @@ function toggleModeCandidat() {
     modeCandidat = !modeCandidat;
     selectedCells.clear();
 
-    const btn = document.getElementById("btnCandidat");
-    btn.textContent = modeCandidat ? "Candidats : ON" : "Candidats : OFF";
-
+    mettreAJourClavier();
     dessinerTout();
 }
 
@@ -901,6 +922,7 @@ function undo() {
 
     verifierGrille();
     dessinerTout();
+    mettreAJourClavier();
 }
 
 // =====================================================
@@ -1770,3 +1792,4 @@ dessinerTout();
 afficherStatsSolveur();
 afficherNomPartie();
 afficherTimer();
+mettreAJourClavier();

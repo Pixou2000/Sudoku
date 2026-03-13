@@ -51,10 +51,45 @@ button {
     font-size: 22px;
     padding: 0;
     border-radius: 10px;
+    border: 1px solid #888;
+    background: #f0f0f0;
+    transition: background 0.15s, color 0.15s, transform 0.08s;
+}
+
+#clavier button:active {
+    transform: scale(0.95);
 }
 
 #clavier .effacer {
-    grid-column: 1 / span 3;
+    grid-column: 2 / span 2;
+}
+
+#btnCandidatClavier {
+    grid-column: 1 / span 1;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* mode chiffres */
+#clavier.mode-chiffre .num {
+    background: #f0f0f0;
+    color: black;
+}
+
+/* mode candidats */
+#clavier.mode-candidat .num {
+    background: #fff3f3;
+    color: #a00000;
+}
+
+#btnCandidatClavier.inactif {
+    background: #e8f6e8;
+    color: #106010;
+}
+
+#btnCandidatClavier.actif {
+    background: #ffd6d6;
+    color: #a00000;
 }
 
 #sudokuCanvas {
