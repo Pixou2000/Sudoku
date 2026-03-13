@@ -98,6 +98,18 @@ button {
     user-select: none;
 }
 
+#statsSolveur,
+#statsJeu {
+    text-align: left;
+    font-size: 14px;
+    background: #f8f8f8;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 0;
+    min-width: 180px;
+}
+
 /* iPad portrait / petits écrans 
 @media (max-width: 900px) {
     #jeu {
