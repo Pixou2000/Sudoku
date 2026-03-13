@@ -29,6 +29,7 @@ let timerDepart = null;
 let timerEnPause = false;
 
 let statsSolveur = null;
+let statsJeu = null;
 
 let nomSauvegarde = "sudoku";
 const VERSION_SAUVEGARDE = 1;
@@ -306,7 +307,8 @@ function sauverPartie() {
         couleurCandidat: couleurCandidat,
         couleurSelection: couleurSelection,
         couleurCellule: couleurCellule,
-        statsSolveur: statsSolveur
+        statsSolveur: statsSolveur,
+        statsJeu: statsJeu
     };
 
     const json = JSON.stringify(data, null, 2);
@@ -393,10 +395,18 @@ function chargerPartie(event) {
         }
     };
 
+    statsJeu = data.statsJeu ?? {
+    chiffres_places: 0,
+    candidats_ajoutes: 0,
+    candidats_supprimes: 0,
+    effacements: 0,
+    undo: 0
+    };
     reader.readAsText(file);
     event.target.value = "";
     statsSolveur = data.statsSolveur ?? null;
     mettreAJourClavier();
+    afficherStatsJeu();
 }
 
 function afficherNomPartie() {
@@ -418,6 +428,7 @@ function formaterTemps(totalSecondes) {
 
 function afficherTimer() {
     document.getElementById("timer").textContent = formaterTemps(tempsEcoule);
+    afficherStatsJeu();
 }
 
 function demarrerTimer() {
@@ -505,6 +516,7 @@ function nouvelleGrille() {
     ajusterCanvas();
     dessinerTout();
     reinitialiserTimer();
+    reinitialiserStatsJeu();
     mettreAJourClavier();
 
     nomSauvegarde = "sudoku";
@@ -512,31 +524,52 @@ function nouvelleGrille() {
 }
 
 function effacerCands() {
+
     let cellules = getCellsSelectionnees();
 
     cellules.forEach(({ l, c }) => {
+
         if (grilleFixe[l][c]) return;
 
-        // grille[l][c] = 0;
-        grilleCand[l][c] = [];
+        if (grilleCand[l][c].length > 0) {
+            grilleCand[l][c] = [];
+
+            if (statsJeu) {
+                statsJeu.effacements += 1;
+            }
+        }
+
     });
 
     verifierGrille();
     dessinerTout();
+    afficherStatsJeu();
 }
 
 function effacer() {
+
     let cellules = getCellsSelectionnees();
 
     cellules.forEach(({ l, c }) => {
+
         if (grilleFixe[l][c]) return;
+
+        const avaitQuelqueChose =
+            (grille[l][c] !== 0) ||
+            (grilleCand[l][c].length > 0);
 
         grille[l][c] = 0;
         grilleCand[l][c] = [];
+
+        if (avaitQuelqueChose && statsJeu) {
+            statsJeu.effacements += 1;
+        }
+
     });
 
     verifierGrille();
     dessinerTout();
+    afficherStatsJeu();
 }
 
 function effacerBouton() {
@@ -762,9 +795,11 @@ function touche(n) {
 
                 if (liste.some(x => x.n === n)) {
                     grilleCand[l][c] = liste.filter(x => x.n !== n);
+                    if (statsJeu) statsJeu.candidats_supprimes += 1;
                 } else {
                     liste.push({ n: n, c: couleurCandidat });
                     liste.sort((a, b) => a.n - b.n);
+                    if (statsJeu) statsJeu.candidats_ajoutes += 1;
                 }
             });
         } else {
@@ -773,11 +808,14 @@ function touche(n) {
             grille[caseSel.l][caseSel.c] = n;
             grilleCand[caseSel.l][caseSel.c] = [];
 
+            if (statsJeu) statsJeu.chiffres_places += 1;
+
             supprimerCandidatAutour(caseSel.l, caseSel.c, n);
         }
 
         verifierGrille();
         dessinerTout();
+        
     }
 }
 
@@ -905,7 +943,7 @@ function sauverEtat() {
 
 function undo() {
     if (pileUndo.length === 0) return;
-
+    if (statsJeu) statsJeu.undo += 1;
     let etat = pileUndo.pop();
 
     grille = etat.grille;
@@ -923,6 +961,7 @@ function undo() {
     verifierGrille();
     dessinerTout();
     mettreAJourClavier();
+    afficherStatsJeu();
 }
 
 // =====================================================
@@ -1782,6 +1821,40 @@ function resoudreSudokuJS(grilleDepart) {
 }
 
 // =====================================================
+// STATS DE JEU
+// =====================================================
+function reinitialiserStatsJeu() {
+    statsJeu = {
+        chiffres_places: 0,
+        candidats_ajoutes: 0,
+        candidats_supprimes: 0,
+        effacements: 0,
+        undo: 0
+    };
+
+    afficherStatsJeu();
+}
+
+function afficherStatsJeu() {
+    const zone = document.getElementById("statsJeu");
+    if (!zone) return;
+
+    if (!statsJeu) {
+        zone.textContent = "";
+        return;
+    }
+
+    zone.textContent =
+        "Stats joueur\n" +
+        "Chiffres placés : " + statsJeu.chiffres_places + "\n" +
+        "Candidats ajoutés : " + statsJeu.candidats_ajoutes + "\n" +
+        "Candidats supprimés : " + statsJeu.candidats_supprimes + "\n" +
+        "Effacements : " + statsJeu.effacements + "\n" +
+        "Undo : " + statsJeu.undo + "\n" +
+        "Temps : " + formaterTemps(tempsEcoule);
+}
+
+// =====================================================
 // DEBUG / INIT
 // =====================================================
 function afficherMode() {
@@ -1793,3 +1866,4 @@ afficherStatsSolveur();
 afficherNomPartie();
 afficherTimer();
 mettreAJourClavier();
+reinitialiserStatsJeu();
