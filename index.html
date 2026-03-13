@@ -82,8 +82,6 @@
       </button>
       
       <button onclick="resoudreGrille()">Résoudre grille</button>
-      <pre id="statsSolveur" style="font-size:14px; white-space:pre-wrap;"></pre>
-      <pre id="statsJeu" style="font-size:14px; white-space:pre-wrap;"></pre>
       
     </div>
 
@@ -142,6 +140,11 @@
       <button id="btnCandidatClavier" onclick="toggleModeCandidat()">✎</button>
       <button class="effacer" onclick="effacerBouton()">⌫</button>
     </div>
+  </div>
+
+  <div id="zoneStats">
+    <pre id="statsJeu"></pre>
+    <pre id="statsSolveur"></pre>
   </div>
 
   <script src="sudoku.js"></script>
