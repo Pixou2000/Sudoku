@@ -280,6 +280,8 @@ function dessinerPause() {
 // SAVE / LOAD
 // =====================================================
 function sauverPartie() {
+    const timerEtaitActif = (mode === "jeu" && !timerEnPause && timerInterval !== null);
+
     if (mode === "jeu") {
         arreterTimer();
     }
@@ -287,7 +289,7 @@ function sauverPartie() {
     let nom = prompt("Nom de la sauvegarde :", nomSauvegarde);
 
     if (!nom) {
-        if (mode === "jeu" && !timerEnPause) demarrerTimer();
+        if (timerEtaitActif) demarrerTimer();
         return;
     }
 
@@ -322,7 +324,7 @@ function sauverPartie() {
 
     URL.revokeObjectURL(url);
 
-    if (mode === "jeu" && !timerEnPause) {
+    if (timerEtaitActif) {
         demarrerTimer();
     }
 }
@@ -337,23 +339,36 @@ function chargerPartie(event) {
         try {
             const data = JSON.parse(e.target.result);
 
-            grille = data.grille ?? grille;
-            grilleCand = data.grilleCand ?? grilleCand;
-            grilleFixe = data.grilleFixe ?? grilleFixe;
-            grilleCouleur = data.grilleCouleur ?? grilleCouleur;
+            grille = data.grille ?? Array.from({ length: 9 }, () => Array(9).fill(0));
+            grilleCand = data.grilleCand ?? Array.from({ length: 9 }, () =>
+                Array.from({ length: 9 }, () => [])
+            );
+            grilleFixe = data.grilleFixe ?? Array.from({ length: 9 }, () => Array(9).fill(false));
+            grilleCouleur = data.grilleCouleur ?? Array.from({ length: 9 }, () => Array(9).fill(null));
 
             mode = data.mode ?? "preparation";
             modeCandidat = data.modeCandidat ?? false;
 
             tempsEcoule = data.tempsEcoule ?? 0;
-            couleurCandidat = data.couleurCandidat ?? couleurCandidat;
-            couleurSelection = data.couleurSelection ?? couleurSelection;
-            couleurCellule = data.couleurCellule ?? couleurCellule;
+            couleurCandidat = data.couleurCandidat ?? "grey";
+            couleurSelection = data.couleurSelection ?? "rgba(255,200,200,0.5)";
+            couleurCellule = data.couleurCellule ?? "#ffcccc";
+
+            statsSolveur = data.statsSolveur ?? null;
+            statsJeu = data.statsJeu ?? {
+                chiffres_places: 0,
+                candidats_ajoutes: 0,
+                candidats_supprimes: 0,
+                effacements: 0,
+                undo: 0
+            };
 
             if (data.nom) {
                 nomSauvegarde = data.nom;
-                afficherNomPartie();
+            } else {
+                nomSauvegarde = "sudoku";
             }
+            afficherNomPartie();
 
             selectedCells.clear();
             caseSel = { l: 0, c: 0 };
@@ -363,6 +378,9 @@ function chargerPartie(event) {
             dragSelection = false;
             longPress = false;
             clearTimeout(pressTimer);
+
+            timerEnPause = false;
+            document.getElementById("btnTimer").textContent = "Pause";
 
             if (mode === "jeu") {
                 document.getElementById("btnValider").style.display = "none";
@@ -380,33 +398,24 @@ function chargerPartie(event) {
             arreterTimer();
             afficherTimer();
 
-            timerEnPause = false;
-            document.getElementById("btnTimer").textContent = "Pause";
-
             if (mode === "jeu") {
                 demarrerTimer();
             }
 
             verifierGrille();
+            mettreAJourClavier();
+            afficherStatsSolveur();
+            afficherStatsJeu();
             dessinerTout();
         } catch (err) {
             alert("Fichier de sauvegarde invalide");
             console.error(err);
+        } finally {
+            event.target.value = "";
         }
     };
 
-    statsJeu = data.statsJeu ?? {
-    chiffres_places: 0,
-    candidats_ajoutes: 0,
-    candidats_supprimes: 0,
-    effacements: 0,
-    undo: 0
-    };
     reader.readAsText(file);
-    event.target.value = "";
-    statsSolveur = data.statsSolveur ?? null;
-    mettreAJourClavier();
-    afficherStatsJeu();
 }
 
 function afficherNomPartie() {

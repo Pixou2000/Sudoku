@@ -110,6 +110,15 @@ button {
     min-width: 180px;
 }
 
+#zoneStats {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
 /* iPad portrait / petits écrans 
 @media (max-width: 900px) {
     #jeu {
