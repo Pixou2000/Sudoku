@@ -2114,7 +2114,10 @@ window.addEventListener("beforeunload", () => {
         sauvegardeLocaleSilencieuse();
     }
 });
+
 statsJeu = creerStatsJeuParDefaut();
+statsSolveur = null;
+
 dessinerTout();
 afficherStatsSolveur();
 afficherNomPartie();
