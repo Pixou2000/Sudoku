@@ -647,6 +647,8 @@ function nouvelleGrille() {
     dessinerTout();
     reinitialiserTimer();
     reinitialiserStatsJeu();
+    statsSolveur = null;
+    afficherStatsSolveur();
     mettreAJourClavier();
 
     nomSauvegarde = "sudoku";
@@ -902,6 +904,9 @@ function validerGrilleDepart() {
     document.getElementById("btnCandidat").textContent = "Candidats : OFF";
     document.getElementById("btnValider").style.display = "none";
     document.getElementById("infoMode").style.display = "inline";
+
+    statsSolveur = null;
+    afficherStatsSolveur();
 
     dessinerTout();
     return true;
