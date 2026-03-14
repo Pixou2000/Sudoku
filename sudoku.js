@@ -31,6 +31,9 @@ let timerEnPause = false;
 let statsSolveur = null;
 let statsJeu = null;
 
+let partieGagnee = false;
+let autoSaveAvantQuit = true;
+
 let nomSauvegarde = "sudoku";
 const VERSION_SAUVEGARDE = 1;
 
@@ -88,6 +91,7 @@ function dessinerTout() {
     dessinerChiffres();
     dessinerSelection();
     dessinerPause();
+    dessinerVictoire();
 }
 
 function dessinerGrille() {
@@ -276,6 +280,19 @@ function dessinerPause() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+function dessinerVictoire() {
+    if (!partieGagnee) return;
+
+    ctx.fillStyle = "rgba(120, 220, 120, 0.28)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "rgba(0, 120, 0, 0.95)";
+    ctx.font = "bold 56px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Gagné !", canvas.width / 2, canvas.height / 2);
+}
+
 // =====================================================
 // SAVE / LOAD
 // =====================================================
@@ -296,22 +313,7 @@ function sauverPartie() {
     nomSauvegarde = nom;
     afficherNomPartie();
 
-    const data = {
-        version: VERSION_SAUVEGARDE,
-        nom: nomSauvegarde,
-        grille: grille,
-        grilleCand: grilleCand,
-        grilleFixe: grilleFixe,
-        grilleCouleur: grilleCouleur,
-        mode: mode,
-        modeCandidat: modeCandidat,
-        tempsEcoule: tempsEcoule,
-        couleurCandidat: couleurCandidat,
-        couleurSelection: couleurSelection,
-        couleurCellule: couleurCellule,
-        statsSolveur: statsSolveur,
-        statsJeu: statsJeu
-    };
+    const data = construireDonneesSauvegarde();
 
     const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: "application/json" });
@@ -422,6 +424,126 @@ function afficherNomPartie() {
     document.getElementById("nomPartie").textContent = "Partie : " + nomSauvegarde;
 }
 
+function construireDonneesSauvegarde() {
+    return {
+        version: VERSION_SAUVEGARDE,
+        nom: nomSauvegarde,
+        grille: grille,
+        grilleCand: grilleCand,
+        grilleFixe: grilleFixe,
+        grilleCouleur: grilleCouleur,
+        mode: mode,
+        modeCandidat: modeCandidat,
+        tempsEcoule: tempsEcoule,
+        couleurCandidat: couleurCandidat,
+        couleurSelection: couleurSelection,
+        couleurCellule: couleurCellule,
+        statsSolveur: statsSolveur,
+        statsJeu: statsJeu,
+        partieGagnee: partieGagnee
+    };
+}
+
+function sauvegardeLocaleSilencieuse() {
+    try {
+        if (mode === "jeu") {
+            arreterTimer();
+        }
+
+        const data = construireDonneesSauvegarde();
+        localStorage.setItem("sudoku_autosave", JSON.stringify(data));
+    } catch (err) {
+        console.error("Erreur autosave :", err);
+    }
+}
+
+function chargerAutosaveLocale() {
+    try {
+        const brut = localStorage.getItem("sudoku_autosave");
+        if (!brut) return;
+
+        const data = JSON.parse(brut);
+
+        grille = data.grille ?? Array.from({ length: 9 }, () => Array(9).fill(0));
+        grilleCand = data.grilleCand ?? Array.from({ length: 9 }, () =>
+            Array.from({ length: 9 }, () => [])
+        );
+        grilleFixe = data.grilleFixe ?? Array.from({ length: 9 }, () => Array(9).fill(false));
+        grilleCouleur = data.grilleCouleur ?? Array.from({ length: 9 }, () => Array(9).fill(null));
+
+        mode = data.mode ?? "preparation";
+        modeCandidat = data.modeCandidat ?? false;
+
+        tempsEcoule = data.tempsEcoule ?? 0;
+        couleurCandidat = data.couleurCandidat ?? "grey";
+        couleurSelection = data.couleurSelection ?? "rgba(255,200,200,0.5)";
+        couleurCellule = data.couleurCellule ?? "#ffcccc";
+
+        statsSolveur = data.statsSolveur ?? null;
+        statsJeu = {
+            ...creerStatsJeuParDefaut(),
+            ...(data.statsJeu ?? {})
+        };
+
+        partieGagnee = data.partieGagnee ?? false;
+
+        nomSauvegarde = data.nom ?? "sudoku";
+        afficherNomPartie();
+
+        selectedCells.clear();
+        caseSel = { l: 0, c: 0 };
+        pileUndo = [];
+        drag = false;
+        pointerStartCell = null;
+        dragSelection = false;
+        longPress = false;
+        clearTimeout(pressTimer);
+
+        timerEnPause = false;
+        document.getElementById("btnTimer").textContent = "Pause";
+
+        if (mode === "jeu") {
+            document.getElementById("btnValider").style.display = "none";
+            document.getElementById("infoMode").style.display = "inline";
+        } else {
+            document.getElementById("btnValider").style.display = "inline";
+            document.getElementById("infoMode").style.display = "none";
+        }
+
+        const btn = document.getElementById("btnCandidat");
+        if (btn) {
+            btn.textContent = modeCandidat ? "Candidats : ON" : "Candidats : OFF";
+        }
+
+        arreterTimer();
+        afficherTimer();
+
+        verifierGrille();
+        mettreAJourClavier();
+        afficherStatsSolveur();
+        afficherStatsJeu();
+        dessinerTout();
+
+        if (mode === "jeu" && !partieGagnee) {
+            demarrerTimer();
+        }
+    } catch (err) {
+        console.error("Erreur chargement autosave :", err);
+    }
+}
+
+function quitterPartie() {
+    sauvegardeLocaleSilencieuse();
+
+    alert("Partie enregistrée avant fermeture.");
+
+    try {
+        window.close();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 // =====================================================
 // MINUTERIE
 // =====================================================
@@ -513,6 +635,7 @@ function nouvelleGrille() {
     pointerStartCell = null;
     dragSelection = false;
     longPress = false;
+    partieGagnee = false;
     clearTimeout(pressTimer);
 
     timerEnPause = false;
@@ -591,6 +714,27 @@ function effacerBoutonCands() {
     effacerCands();
 }
 
+function grilleCompleteEtValide() {
+    for (let l = 0; l < 9; l++) {
+        for (let c = 0; c < 9; c++) {
+            const n = grille[l][c];
+            if (n === 0) return false;
+            if (!estValidePlacement(l, c, n)) return false;
+        }
+    }
+    return true;
+}
+
+function verifierVictoire() {
+    if (mode !== "jeu") return;
+    if (partieGagnee) return;
+
+    if (grilleCompleteEtValide()) {
+        partieGagnee = true;
+        arreterTimer();
+        dessinerTout();
+    }
+}
 
 // =====================================================
 // CANDIDATS
@@ -724,6 +868,7 @@ function validerGrilleDepart() {
 
     mode = "jeu";
     modeCandidat = false;
+    partieGagnee = false;
     reinitialiserTimer();
     demarrerTimer();
     timerEnPause = false;
@@ -779,6 +924,7 @@ function mettreAJourClavier() {
 // ACTIONS UTILISATEUR
 // =====================================================
 function touche(n) {
+    if (partieGagnee) return;
     if (mode === "preparation") {
         const cellules = getCellsSelectionnees();
 
@@ -824,7 +970,7 @@ function touche(n) {
 
         verifierGrille();
         dessinerTout();
-        
+        verifierVictoire();
     }
 }
 
@@ -1870,9 +2016,16 @@ function afficherMode() {
     console.log("Mode actuel :", mode);
 }
 
+window.addEventListener("beforeunload", () => {
+    if (autoSaveAvantQuit) {
+        sauvegardeLocaleSilencieuse();
+    }
+});
+statsJeu = creerStatsJeuParDefaut();
 dessinerTout();
 afficherStatsSolveur();
 afficherNomPartie();
 afficherTimer();
 mettreAJourClavier();
-reinitialiserStatsJeu();
+afficherStatsJeu();
+chargerAutosaveLocale();
