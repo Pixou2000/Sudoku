@@ -2109,11 +2109,11 @@ function afficherMode() {
     console.log("Mode actuel :", mode);
 }
 
-window.addEventListener("beforeunload", () => {
-    if (autoSaveAvantQuit) {
+/*window.addEventListener("beforeunload", () => {
+   if (autoSaveAvantQuit) {
         sauvegardeLocaleSilencieuse();
-    }
-});
+   }
+});*/
 
 statsJeu = creerStatsJeuParDefaut();
 statsSolveur = null;
