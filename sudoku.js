@@ -2124,4 +2124,3 @@ afficherNomPartie();
 afficherTimer();
 mettreAJourClavier();
 afficherStatsJeu();
-chargerAutosaveLocale();
