@@ -357,13 +357,11 @@ function chargerPartie(event) {
             couleurCellule = data.couleurCellule ?? "#ffcccc";
 
             statsSolveur = data.statsSolveur ?? null;
-            statsJeu = data.statsJeu ?? {
-                chiffres_places: 0,
-                candidats_ajoutes: 0,
-                candidats_supprimes: 0,
-                effacements: 0,
-                undo: 0
+            statsJeu = {
+                ...creerStatsJeuParDefaut(),
+                ...(data.statsJeu ?? {})
             };
+            partieGagnee = data.partieGagnee ?? false;
 
             if (data.nom) {
                 nomSauvegarde = data.nom;
@@ -740,15 +738,27 @@ function verifierVictoire() {
 // CANDIDATS
 // =====================================================
 function creerCandidatsCellule(l, c) {
-    if (grille[l][c] !== 0) return;
+    if (grille[l][c] !== 0) return 0;
 
-    grilleCand[l][c] = [];
+    const anciens = new Set(grilleCand[l][c].map(x => x.n));
+    const nouveaux = [];
 
     for (let n = 1; n <= 9; n++) {
         if (estValide(l, c, n)) {
-            grilleCand[l][c].push({ n: n, c: couleurCandidat });
+            nouveaux.push({ n: n, c: couleurCandidat });
         }
     }
+
+    grilleCand[l][c] = nouveaux;
+
+    let ajoutes = 0;
+    for (const cand of nouveaux) {
+        if (!anciens.has(cand.n)) {
+            ajoutes += 1;
+        }
+    }
+
+    return ajoutes;
 }
 
 function supprimerCandidatAutour(l, c, n) {
@@ -774,17 +784,31 @@ function supprimerCandidatAutour(l, c, n) {
 
 function creerTousCandidats() {
     if (mode !== "jeu") return;
+    if (partieGagnee) return;
+
+    sauverEtat();
+
+    if (statsJeu && statsJeu.premier_usage_tous_cands === null) {
+        statsJeu.premier_usage_tous_cands = tempsEcoule;
+    }
+
+    let totalAjoutes = 0;
 
     for (let l = 0; l < 9; l++) {
         for (let c = 0; c < 9; c++) {
             if (grilleFixe[l][c]) continue;
             if (grille[l][c] !== 0) continue;
 
-            creerCandidatsCellule(l, c);
+            totalAjoutes += creerCandidatsCellule(l, c);
         }
     }
 
+    if (statsJeu) {
+        statsJeu.candidats_ajoutes_tous_cands += totalAjoutes;
+    }
+
     dessinerTout();
+    afficherStatsJeu();
 }
 
 // =====================================================
@@ -950,11 +974,17 @@ function touche(n) {
 
                 if (liste.some(x => x.n === n)) {
                     grilleCand[l][c] = liste.filter(x => x.n !== n);
-                    if (statsJeu) statsJeu.candidats_supprimes += 1;
+
+                    if (statsJeu) {
+                    statsJeu.candidats_supprimes_manuel += 1;
+                    }
                 } else {
                     liste.push({ n: n, c: couleurCandidat });
                     liste.sort((a, b) => a.n - b.n);
-                    if (statsJeu) statsJeu.candidats_ajoutes += 1;
+
+                    if (statsJeu) {
+                    statsJeu.candidats_ajoutes_manuel += 1;
+                    }
                 }
             });
         } else {
@@ -1003,17 +1033,30 @@ function getCellsSelectionnees() {
 
 function creerCandidatsSelection() {
     if (mode !== "jeu") return;
+    if (partieGagnee) return;
+
+    sauverEtat();
+
+    if (statsJeu && statsJeu.premier_usage_cands_selection === null) {
+        statsJeu.premier_usage_cands_selection = tempsEcoule;
+    }
 
     const cellules = getCellsSelectionnees();
+    let totalAjoutes = 0;
 
     cellules.forEach(({ l, c }) => {
         if (grilleFixe[l][c]) return;
         if (grille[l][c] !== 0) return;
 
-        creerCandidatsCellule(l, c);
+        totalAjoutes += creerCandidatsCellule(l, c);
     });
 
+    if (statsJeu) {
+        statsJeu.candidats_ajoutes_cands_selection += totalAjoutes;
+    }
+
     dessinerTout();
+    afficherStatsJeu();
 }
 
 function changerCouleurCandidats() {
@@ -1978,15 +2021,44 @@ function resoudreSudokuJS(grilleDepart) {
 // =====================================================
 // STATS DE JEU
 // =====================================================
-function reinitialiserStatsJeu() {
-    statsJeu = {
+function creerStatsJeuParDefaut() {
+    return {
         chiffres_places: 0,
-        candidats_ajoutes: 0,
-        candidats_supprimes: 0,
+
+        candidats_ajoutes_manuel: 0,
+        candidats_supprimes_manuel: 0,
+
+        candidats_ajoutes_cands_selection: 0,
+        candidats_ajoutes_tous_cands: 0,
+
+        premier_usage_cands_selection: null,
+        premier_usage_tous_cands: null,
+
         effacements: 0,
         undo: 0
     };
+}
 
+function creerStatsJeuParDefaut() {
+    return {
+        chiffres_places: 0,
+
+        candidats_ajoutes_manuel: 0,
+        candidats_supprimes_manuel: 0,
+
+        candidats_ajoutes_cands_selection: 0,
+        candidats_ajoutes_tous_cands: 0,
+
+        premier_usage_cands_selection: null,
+        premier_usage_tous_cands: null,
+
+        effacements: 0,
+        undo: 0
+    };
+}
+
+function reinitialiserStatsJeu() {
+    statsJeu = creerStatsJeuParDefaut();
     afficherStatsJeu();
 }
 
@@ -1999,11 +2071,27 @@ function afficherStatsJeu() {
         return;
     }
 
+    const tCandsSelection = statsJeu.premier_usage_cands_selection === null
+        ? "-"
+        : formaterTemps(statsJeu.premier_usage_cands_selection);
+
+    const tTousCands = statsJeu.premier_usage_tous_cands === null
+        ? "-"
+        : formaterTemps(statsJeu.premier_usage_tous_cands);
+
     zone.textContent =
         "Stats joueur\n" +
         "Chiffres placés : " + statsJeu.chiffres_places + "\n" +
-        "Candidats ajoutés : " + statsJeu.candidats_ajoutes + "\n" +
-        "Candidats supprimés : " + statsJeu.candidats_supprimes + "\n" +
+        "\n" +
+        "Candidats manuels + : " + statsJeu.candidats_ajoutes_manuel + "\n" +
+        "Candidats manuels - : " + statsJeu.candidats_supprimes_manuel + "\n" +
+        "\n" +
+        "Ajout via Cands sélection : " + statsJeu.candidats_ajoutes_cands_selection + "\n" +
+        "1er usage Cands sélection : " + tCandsSelection + "\n" +
+        "\n" +
+        "Ajout via Tous cands : " + statsJeu.candidats_ajoutes_tous_cands + "\n" +
+        "1er usage Tous cands : " + tTousCands + "\n" +
+        "\n" +
         "Effacements : " + statsJeu.effacements + "\n" +
         "Undo : " + statsJeu.undo + "\n" +
         "Temps : " + formaterTemps(tempsEcoule);
