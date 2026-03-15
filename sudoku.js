@@ -285,6 +285,7 @@ function dessinerCouleurs() {
             }
 
             // 3 couleurs : 3 bandes diagonales régulières
+            // 3 couleurs : 3 bandes diagonales régulières sans chevauchement
             else {
                 ctx.save();
 
@@ -293,45 +294,31 @@ function dessinerCouleurs() {
                 ctx.rect(x, y, w, h);
                 ctx.clip();
 
-                const d = w / 3;
+                // centre de la cellule
+                const cx = x + w / 2;
+                const cy = y + h / 2;
+
+                // diagonale utile après rotation
+                const diag = Math.sqrt(w * w + h * h);
+
+                // largeur d'une bande
+                const bande = diag / 3;
+
+                // rotation pour obtenir des bandes à 45°
+                ctx.translate(cx, cy);
+                ctx.rotate(-Math.PI / 4);
 
                 // bande 1
-                ctx.beginPath();
-                ctx.moveTo(x - h, y + d);
-                ctx.lineTo(x - h + d, y);
-                ctx.lineTo(x + d, y);
-                ctx.lineTo(x + w, y + h - d);
-                ctx.lineTo(x + w, y + h);
-                ctx.lineTo(x + w - d, y + h);
-                ctx.closePath();
                 ctx.fillStyle = couleurTransparente(couleurs[0]);
-                ctx.fill();
+                ctx.fillRect(-diag / 2, -diag / 2, diag, bande);
 
                 // bande 2
-                ctx.beginPath();
-                ctx.moveTo(x - h + d, y + d);
-                ctx.lineTo(x - h + 2 * d, y);
-                ctx.lineTo(x + 2 * d, y);
-                ctx.lineTo(x + w, y + h - 2 * d);
-                ctx.lineTo(x + w, y + h - d);
-                ctx.lineTo(x + w - d, y + h);
-                ctx.lineTo(x + w - 2 * d, y + h);
-                ctx.closePath();
                 ctx.fillStyle = couleurTransparente(couleurs[1]);
-                ctx.fill();
+                ctx.fillRect(-diag / 2, -diag / 2 + bande, diag, bande);
 
                 // bande 3
-                ctx.beginPath();
-                ctx.moveTo(x - h + 2 * d, y + d);
-                ctx.lineTo(x - h + 3 * d, y);
-                ctx.lineTo(x + 3 * d, y);
-                ctx.lineTo(x + w, y + h - 3 * d);
-                ctx.lineTo(x + w, y + h - 2 * d);
-                ctx.lineTo(x + w - 2 * d, y + h);
-                ctx.lineTo(x + w - 3 * d, y + h);
-                ctx.closePath();
                 ctx.fillStyle = couleurTransparente(couleurs[2]);
-                ctx.fill();
+                ctx.fillRect(-diag / 2, -diag / 2 + 2 * bande, diag, bande);
 
                 ctx.restore();
             }
@@ -423,7 +410,9 @@ function chargerPartie(event) {
                 Array.from({ length: 9 }, () => [])
             );
             grilleFixe = data.grilleFixe ?? Array.from({ length: 9 }, () => Array(9).fill(false));
-            grilleCouleur = data.grilleCouleur ?? Array.from({ length: 9 }, () => Array(9).fill(null));
+            grilleCouleur = data.grilleCouleur ?? Array.from({ length: 9 }, () =>
+            Array.from({ length: 9 }, () => [])
+            );
 
             mode = data.mode ?? "preparation";
             modeCandidat = data.modeCandidat ?? false;
@@ -544,8 +533,9 @@ function chargerAutosaveLocale() {
             Array.from({ length: 9 }, () => [])
         );
         grilleFixe = data.grilleFixe ?? Array.from({ length: 9 }, () => Array(9).fill(false));
-        grilleCouleur = data.grilleCouleur ?? Array.from({ length: 9 }, () => Array(9).fill(null));
-
+        grilleCouleur = data.grilleCouleur ?? Array.from({ length: 9 }, () =>
+        Array.from({ length: 9 }, () => [])
+        );
         mode = data.mode ?? "preparation";
         modeCandidat = data.modeCandidat ?? false;
 
@@ -2157,23 +2147,6 @@ function resoudreSudokuJS(grilleDepart) {
 // =====================================================
 // STATS DE JEU
 // =====================================================
-function creerStatsJeuParDefaut() {
-    return {
-        chiffres_places: 0,
-
-        candidats_ajoutes_manuel: 0,
-        candidats_supprimes_manuel: 0,
-
-        candidats_ajoutes_cands_selection: 0,
-        candidats_ajoutes_tous_cands: 0,
-
-        premier_usage_cands_selection: null,
-        premier_usage_tous_cands: null,
-
-        effacements: 0,
-        undo: 0
-    };
-}
 
 function creerStatsJeuParDefaut() {
     return {
