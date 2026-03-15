@@ -259,71 +259,81 @@ function dessinerCouleurs() {
             const w = tailleCell;
             const h = tailleCell;
 
-            // 1 couleur : remplissage plein
+            // 1 couleur : fond plein
             if (couleurs.length === 1) {
-                ctx.fillStyle = couleurs[0];
+                ctx.fillStyle = couleurTransparente(couleurs[0]);
                 ctx.fillRect(x, y, w, h);
             }
 
-            // 2 couleurs : diagonale à 45°
+            // 2 couleurs : diagonale simple
             else if (couleurs.length === 2) {
-                // triangle haut-gauche
                 ctx.beginPath();
                 ctx.moveTo(x, y);
                 ctx.lineTo(x + w, y);
                 ctx.lineTo(x, y + h);
                 ctx.closePath();
-                ctx.fillStyle = couleurs[0];
+                ctx.fillStyle = couleurTransparente(couleurs[0]);
                 ctx.fill();
 
-                // triangle bas-droit
                 ctx.beginPath();
                 ctx.moveTo(x + w, y);
                 ctx.lineTo(x + w, y + h);
                 ctx.lineTo(x, y + h);
                 ctx.closePath();
-                ctx.fillStyle = couleurs[1];
+                ctx.fillStyle = couleurTransparente(couleurs[1]);
                 ctx.fill();
             }
 
-            // 3 couleurs : 3 bandes diagonales parallèles
+            // 3 couleurs : 3 bandes diagonales régulières
             else {
+                ctx.save();
+
+                // clip à la cellule
+                ctx.beginPath();
+                ctx.rect(x, y, w, h);
+                ctx.clip();
+
+                const d = w / 3;
+
                 // bande 1
                 ctx.beginPath();
-                ctx.moveTo(x, y);
-                ctx.lineTo(x + w / 3, y);
-                ctx.lineTo(x, y + h / 3);
+                ctx.moveTo(x - h, y + d);
+                ctx.lineTo(x - h + d, y);
+                ctx.lineTo(x + d, y);
+                ctx.lineTo(x + w, y + h - d);
+                ctx.lineTo(x + w, y + h);
+                ctx.lineTo(x + w - d, y + h);
                 ctx.closePath();
-                ctx.fillStyle = couleurs[0];
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.moveTo(x + w / 3, y);
-                ctx.lineTo(x, y + h / 3);
-                ctx.lineTo(x, y + 2 * h / 3);
-                ctx.lineTo(x + 2 * w / 3, y);
-                ctx.closePath();
-                ctx.fillStyle = couleurs[0];
+                ctx.fillStyle = couleurTransparente(couleurs[0]);
                 ctx.fill();
 
                 // bande 2
                 ctx.beginPath();
-                ctx.moveTo(x + 2 * w / 3, y);
-                ctx.lineTo(x + w, y);
-                ctx.lineTo(x, y + w);
-                ctx.lineTo(x, y + 2 * h / 3);
+                ctx.moveTo(x - h + d, y + d);
+                ctx.lineTo(x - h + 2 * d, y);
+                ctx.lineTo(x + 2 * d, y);
+                ctx.lineTo(x + w, y + h - 2 * d);
+                ctx.lineTo(x + w, y + h - d);
+                ctx.lineTo(x + w - d, y + h);
+                ctx.lineTo(x + w - 2 * d, y + h);
                 ctx.closePath();
-                ctx.fillStyle = couleurs[1];
+                ctx.fillStyle = couleurTransparente(couleurs[1]);
                 ctx.fill();
 
                 // bande 3
                 ctx.beginPath();
-                ctx.moveTo(x + w, y);
-                ctx.lineTo(x + w, y + h);
-                ctx.lineTo(x, y + h);
+                ctx.moveTo(x - h + 2 * d, y + d);
+                ctx.lineTo(x - h + 3 * d, y);
+                ctx.lineTo(x + 3 * d, y);
+                ctx.lineTo(x + w, y + h - 3 * d);
+                ctx.lineTo(x + w, y + h - 2 * d);
+                ctx.lineTo(x + w - 2 * d, y + h);
+                ctx.lineTo(x + w - 3 * d, y + h);
                 ctx.closePath();
-                ctx.fillStyle = couleurs[2];
+                ctx.fillStyle = couleurTransparente(couleurs[2]);
                 ctx.fill();
+
+                ctx.restore();
             }
         }
     }
@@ -1167,6 +1177,28 @@ function ajouterCouleurCellule(l, c, couleur) {
     }
 }
 
+function effacerCouleurSelection() {
+    const cellules = getCellsSelectionnees();
+
+    cellules.forEach(({ l, c }) => {
+        if (grilleFixe[l][c]) return;
+        grilleCouleur[l][c] = [];
+    });
+
+    dessinerTout();
+}
+
+function couleurTransparente(hex, alpha = 0.35) {
+
+    if (!hex || hex[0] !== "#") return hex;
+
+    const r = parseInt(hex.substring(1, 3), 16);
+    const g = parseInt(hex.substring(3, 5), 16);
+    const b = parseInt(hex.substring(5, 7), 16);
+
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
 function afficherStatsSolveur() {
     const zone = document.getElementById("statsSolveur");
     if (!zone) return;
@@ -1250,6 +1282,16 @@ function undo() {
     dessinerTout();
     mettreAJourClavier();
     afficherStatsJeu();
+}
+
+function colorerSelectionBouton() {
+    sauverEtat();
+    colorerSelection();
+}
+
+function effacerCouleurSelectionBouton() {
+    sauverEtat();
+    effacerCouleurSelection();
 }
 
 // =====================================================
