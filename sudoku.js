@@ -1399,6 +1399,23 @@ canvas.addEventListener("pointerup", (e) => {
     const cell = celluleDepuisPoint(e.clientX, e.clientY);
     const maintenant = Date.now();
 
+    // cas spécial : reclic simple sur la cellule déjà sélectionnée
+    if (!dragSelection && caseSel && memeCellule(cell, caseSel)) {
+        selectedCells.clear();
+        caseSel = null;
+
+        dessinerTout();
+
+        // IMPORTANT : on annule la mémoire du double tap
+        lastTapTime = 0;
+        lastTapCell = null;
+
+        drag = false;
+        dragSelection = false;
+        pointerStartCell = null;
+        return;
+    }
+
     const doubleTap =
         lastTapCell &&
         memeCellule(cell, lastTapCell) &&
@@ -1410,15 +1427,8 @@ canvas.addEventListener("pointerup", (e) => {
         lastTapCell = null;
     } else {
         if (!dragSelection) {
-            const memeCell = caseSel && memeCellule(cell, caseSel);
-
             selectedCells.clear();
-
-            if (memeCell) {
-                caseSel = null;   // recliquer sur la même cellule enlève la sélection
-            } else {
-                caseSel = cell;
-            }
+            caseSel = cell;
         } else {
             remplirRectangleSelection(pointerStartCell, cell);
             caseSel = cell;
