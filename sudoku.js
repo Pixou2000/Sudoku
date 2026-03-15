@@ -37,7 +37,9 @@ let autoSaveAvantQuit = true;
 let nomSauvegarde = "sudoku";
 const VERSION_SAUVEGARDE = 1;
 
-let grilleCouleur = Array.from({ length: 9 }, () => Array(9).fill(null));
+let grilleCouleur = Array.from({ length: 9 }, () =>
+    Array.from({ length: 9 }, () => [])
+);
 let couleurSelection = "rgba(255,200,200,0.5)";
 let grilleFixe = Array.from({ length: 9 }, () => Array(9).fill(false));
 let modeCandidat = false;
@@ -248,16 +250,80 @@ function dessinerSelectionMultiple() {
 function dessinerCouleurs() {
     for (let l = 0; l < 9; l++) {
         for (let c = 0; c < 9; c++) {
-            let couleur = grilleCouleur[l][c];
+            const couleurs = grilleCouleur[l][c];
 
-            if (couleur) {
-                ctx.fillStyle = couleur;
-                ctx.fillRect(
-                    c * tailleCell,
-                    l * tailleCell,
-                    tailleCell,
-                    tailleCell
-                );
+            if (!couleurs || couleurs.length === 0) continue;
+
+            const x = c * tailleCell;
+            const y = l * tailleCell;
+            const w = tailleCell;
+            const h = tailleCell;
+
+            // 1 couleur : remplissage plein
+            if (couleurs.length === 1) {
+                ctx.fillStyle = couleurs[0];
+                ctx.fillRect(x, y, w, h);
+            }
+
+            // 2 couleurs : diagonale à 45°
+            else if (couleurs.length === 2) {
+                // triangle haut-gauche
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + w, y);
+                ctx.lineTo(x, y + h);
+                ctx.closePath();
+                ctx.fillStyle = couleurs[0];
+                ctx.fill();
+
+                // triangle bas-droit
+                ctx.beginPath();
+                ctx.moveTo(x + w, y);
+                ctx.lineTo(x + w, y + h);
+                ctx.lineTo(x, y + h);
+                ctx.closePath();
+                ctx.fillStyle = couleurs[1];
+                ctx.fill();
+            }
+
+            // 3 couleurs : 3 bandes diagonales parallèles
+            else {
+                // bande 1
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + w / 3, y);
+                ctx.lineTo(x, y + h / 3);
+                ctx.closePath();
+                ctx.fillStyle = couleurs[0];
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(x + w / 3, y);
+                ctx.lineTo(x, y + h / 3);
+                ctx.lineTo(x, y + 2 * h / 3);
+                ctx.lineTo(x + 2 * w / 3, y);
+                ctx.closePath();
+                ctx.fillStyle = couleurs[0];
+                ctx.fill();
+
+                // bande 2
+                ctx.beginPath();
+                ctx.moveTo(x + 2 * w / 3, y);
+                ctx.lineTo(x + w, y);
+                ctx.lineTo(x, y + w);
+                ctx.lineTo(x, y + 2 * h / 3);
+                ctx.closePath();
+                ctx.fillStyle = couleurs[1];
+                ctx.fill();
+
+                // bande 3
+                ctx.beginPath();
+                ctx.moveTo(x + w, y);
+                ctx.lineTo(x + w, y + h);
+                ctx.lineTo(x, y + h);
+                ctx.closePath();
+                ctx.fillStyle = couleurs[2];
+                ctx.fill();
             }
         }
     }
@@ -267,7 +333,8 @@ function colorerSelection() {
     const cellules = getCellsSelectionnees();
 
     cellules.forEach(({ l, c }) => {
-        grilleCouleur[l][c] = couleurCellule;
+        if (grilleFixe[l][c]) return;
+        ajouterCouleurCellule(l, c, couleurCellule);
     });
 
     dessinerTout();
@@ -619,7 +686,7 @@ function nouvelleGrille() {
             grilleCand[l][c] = [];
             grilleFixe[l][c] = false;
             grilleErreur[l][c] = false;
-            grilleCouleur[l][c] = null;
+            grilleCouleur[l][c] = [];
         }
     }
 
@@ -1082,6 +1149,24 @@ function changerCouleurSelection() {
     }
 }
 
+function ajouterCouleurCellule(l, c, couleur) {
+    if (grilleFixe[l][c]) return;
+
+    if (!Array.isArray(grilleCouleur[l][c])) {
+        grilleCouleur[l][c] = [];
+    }
+
+    const liste = grilleCouleur[l][c];
+
+    if (liste.length > 0 && liste[liste.length - 1] === couleur) return;
+
+    liste.push(couleur);
+
+    if (liste.length > 3) {
+        grilleCouleur[l][c] = liste.slice(-3);
+    }
+}
+
 function afficherStatsSolveur() {
     const zone = document.getElementById("statsSolveur");
     if (!zone) return;
@@ -1216,7 +1301,11 @@ function selectionnerToutesLesMemesValeurs(cell) {
 
     for (let l = 0; l < 9; l++) {
         for (let c = 0; c < 9; c++) {
-            if (grille[l][c] === n) {
+            const memeChiffre = grille[l][c] === n;
+
+            const aLeCandidat = grilleCand[l][c].some(cand => cand.n === n);
+
+            if (memeChiffre || aLeCandidat) {
                 selectedCells.add(keyCell(l, c));
             }
         }
