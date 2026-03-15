@@ -9,7 +9,7 @@ let tailleCell;
 // =====================================================
 // VARIABLES
 // =====================================================
-let caseSel = { l: 0, c: 0 };
+let caseSel = null;
 let selectedCells = new Set();
 let drag = false;
 
@@ -132,6 +132,7 @@ function dessinerGrille() {
 }
 
 function dessinerSurlignage() {
+    if (!caseSel) return;
     let l = caseSel.l;
     let c = caseSel.c;
 
@@ -219,6 +220,7 @@ function dessinerCandidats() {
 }
 
 function dessinerSelection() {
+    if (!caseSel) return;
     ctx.strokeStyle = "red";
     ctx.lineWidth = 3;
 
@@ -437,7 +439,7 @@ function chargerPartie(event) {
             afficherNomPartie();
 
             selectedCells.clear();
-            caseSel = { l: 0, c: 0 };
+            caseSel = null;
             pileUndo = [];
             drag = false;
             pointerStartCell = null;
@@ -556,7 +558,7 @@ function chargerAutosaveLocale() {
         afficherNomPartie();
 
         selectedCells.clear();
-        caseSel = { l: 0, c: 0 };
+        caseSel = null;
         pileUndo = [];
         drag = false;
         pointerStartCell = null;
@@ -692,7 +694,7 @@ function nouvelleGrille() {
 
     mode = "preparation";
     modeCandidat = false;
-    caseSel = { l: 0, c: 0 };
+    caseSel = null;
     selectedCells.clear();
     pileUndo = [];
 
@@ -1060,6 +1062,7 @@ function touche(n) {
                 }
             });
         } else {
+            if (!caseSel) return;
             if (grilleFixe[caseSel.l][caseSel.c]) return;
 
             grille[caseSel.l][caseSel.c] = n;
@@ -1090,17 +1093,16 @@ function toggleModeCandidat() {
 }
 
 function getCellsSelectionnees() {
-    if (selectedCells.size <= 1) {
-        return [caseSel];
+    if (selectedCells.size > 1) {
+        let cellules = [];
+        selectedCells.forEach(key => {
+            let [l, c] = key.split("_").map(Number);
+            cellules.push({ l, c });
+        });
+        return cellules;
     }
 
-    let cellules = [];
-    selectedCells.forEach(key => {
-        let [l, c] = key.split("_").map(Number);
-        cellules.push({ l, c });
-    });
-
-    return cellules;
+    return caseSel ? [caseSel] : [];
 }
 
 function creerCandidatsSelection() {
@@ -1358,7 +1360,6 @@ canvas.addEventListener("pointerdown", (e) => {
 
     const cell = celluleDepuisPoint(e.clientX, e.clientY);
     pointerStartCell = cell;
-    caseSel = cell;
 
     canvas.setPointerCapture(e.pointerId);
 
@@ -1409,12 +1410,20 @@ canvas.addEventListener("pointerup", (e) => {
         lastTapCell = null;
     } else {
         if (!dragSelection) {
+            const memeCell = caseSel && memeCellule(cell, caseSel);
+
             selectedCells.clear();
+
+            if (memeCell) {
+                caseSel = null;   // recliquer sur la même cellule enlève la sélection
+            } else {
+                caseSel = cell;
+            }
         } else {
             remplirRectangleSelection(pointerStartCell, cell);
+            caseSel = cell;
         }
 
-        caseSel = cell;
         dessinerTout();
 
         lastTapTime = maintenant;
