@@ -12,6 +12,7 @@ let tailleCell;
 let caseSel = null;
 let selectedCells = new Set();
 let drag = false;
+let tapTimer = null;
 
 let mode = "preparation";
 let pileUndo = [];
@@ -1399,14 +1400,20 @@ canvas.addEventListener("pointerup", (e) => {
     const cell = celluleDepuisPoint(e.clientX, e.clientY);
     const maintenant = Date.now();
 
-    // cas spécial : reclic simple sur la cellule déjà sélectionnée
-    if (!dragSelection && caseSel && memeCellule(cell, caseSel)) {
-        selectedCells.clear();
-        caseSel = null;
+    const doubleTap =
+        lastTapCell &&
+        memeCellule(cell, lastTapCell) &&
+        (maintenant - lastTapTime < 350);
 
-        dessinerTout();
+    // 1. Double tap : fonctionne dans tous les cas
+    if (doubleTap) {
+        if (tapTimer) {
+            clearTimeout(tapTimer);
+            tapTimer = null;
+        }
 
-        // IMPORTANT : on annule la mémoire du double tap
+        selectionnerToutesLesMemesValeurs(cell);
+
         lastTapTime = 0;
         lastTapCell = null;
 
@@ -1416,29 +1423,51 @@ canvas.addEventListener("pointerup", (e) => {
         return;
     }
 
-    const doubleTap =
-        lastTapCell &&
-        memeCellule(cell, lastTapCell) &&
-        (maintenant - lastTapTime < 350);
-
-    if (doubleTap) {
-        selectionnerToutesLesMemesValeurs(cell);
-        lastTapTime = 0;
-        lastTapCell = null;
-    } else {
-        if (!dragSelection) {
-            selectedCells.clear();
-            caseSel = cell;
-        } else {
-            remplirRectangleSelection(pointerStartCell, cell);
-            caseSel = cell;
+    // 2. Drag sélection rectangle
+    if (dragSelection) {
+        if (tapTimer) {
+            clearTimeout(tapTimer);
+            tapTimer = null;
         }
 
+        remplirRectangleSelection(pointerStartCell, cell);
+        caseSel = cell;
         dessinerTout();
 
         lastTapTime = maintenant;
         lastTapCell = cell;
+
+        drag = false;
+        dragSelection = false;
+        pointerStartCell = null;
+        return;
     }
+
+    // 3. Clic simple
+    // - si on reclique sur la cellule active : désélection différée
+    // - sinon : sélection immédiate
+    if (caseSel && memeCellule(cell, caseSel)) {
+        if (tapTimer) clearTimeout(tapTimer);
+
+        tapTimer = setTimeout(() => {
+            selectedCells.clear();
+            caseSel = null;
+            dessinerTout();
+            tapTimer = null;
+        }, 350);
+    } else {
+        if (tapTimer) {
+            clearTimeout(tapTimer);
+            tapTimer = null;
+        }
+
+        selectedCells.clear();
+        caseSel = cell;
+        dessinerTout();
+    }
+
+    lastTapTime = maintenant;
+    lastTapCell = cell;
 
     drag = false;
     dragSelection = false;
