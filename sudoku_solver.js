@@ -622,16 +622,20 @@ function appliquerLogiqueJS(gr, stats) {
 }
 
 function evaluerDifficulteDepuisStatsJS(stats) {
+    const techniquesAvancees =
+        stats.locked + stats.pair + stats.hidden_pair;
+
     if (
         stats.guess === 0 &&
-        stats.locked === 0 &&
-        stats.pair === 0 &&
-        stats.hidden_pair === 0
+        techniquesAvancees === 0
     ) {
         return "facile";
     }
 
-    if (stats.guess === 0) {
+    if (
+        stats.guess === 0 &&
+        techniquesAvancees > 0
+    ) {
         return "moyen";
     }
 
