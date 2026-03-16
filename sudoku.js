@@ -3,7 +3,10 @@
 // =====================================================
 const canvas = document.getElementById("sudokuCanvas");
 const ctx = canvas.getContext("2d");
-const VERSION_APP = "v0.1.0 Test";
+function focusGrille() {
+    canvas.focus();
+}
+const VERSION_APP = "v0.1.1 ";
 
 let tailleCell;
 
@@ -737,6 +740,8 @@ function nouvelleGrille() {
 
     nomSauvegarde = "sudoku";
     afficherNomPartie();
+
+    focusGrille();
 }
 
 function effacerCands() {
@@ -993,6 +998,8 @@ function validerGrilleDepart() {
     afficherStatsSolveur();
 
     dessinerTout();
+
+    focusGrille();
     return true;
 }
 
@@ -1330,6 +1337,7 @@ function genererNouvellePartie(cellsToRemove = 45) {
 
     nomSauvegarde = "sudoku";
     afficherNomPartie();
+    focusGrille();
 }
 
 function genererNouvellePartieNiveau(niveau) {
@@ -1392,6 +1400,7 @@ function genererNouvellePartieNiveau(niveau) {
 
     nomSauvegarde = "sudoku";
     afficherNomPartie();
+    focusGrille();
 }
 
 function genererDepuisSelectNiveau() {
@@ -1399,6 +1408,7 @@ function genererDepuisSelectNiveau() {
     const niveau = select ? select.value : "moyen";
 
     genererNouvellePartieNiveau(niveau);
+    focusGrille();
 }
 // =====================================================
 // UNDO
@@ -1517,6 +1527,7 @@ function selectionnerToutesLesMemesValeurs(cell) {
 // =====================================================
 canvas.addEventListener("pointerdown", (e) => {
     e.preventDefault();
+    focusGrille();
 
     drag = true;
     dragSelection = false;
