@@ -631,10 +631,7 @@ function evaluerDifficulteDepuisStatsJS(stats) {
         return "facile";
     }
 
-    if (
-        stats.guess === 0 &&
-        stats.hidden_pair === 0
-    ) {
+    if (stats.guess === 0) {
         return "moyen";
     }
 
