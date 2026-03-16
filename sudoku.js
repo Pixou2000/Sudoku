@@ -3,6 +3,7 @@
 // =====================================================
 const canvas = document.getElementById("sudokuCanvas");
 const ctx = canvas.getContext("2d");
+const VERSION_APP = "v0.1.0 Test";
 
 let tailleCell;
 
@@ -79,6 +80,13 @@ window.addEventListener("resize", () => {
     ajusterCanvas();
     dessinerTout();
 });
+
+function afficherVersionApp() {
+    const zone = document.getElementById("versionApp");
+    if (zone) {
+        zone.textContent = VERSION_APP;
+    }
+}
 
 // =====================================================
 // DESSIN
@@ -1744,3 +1752,4 @@ afficherNomPartie();
 afficherTimer();
 mettreAJourClavier();
 afficherStatsJeu();
+afficherVersionApp();
