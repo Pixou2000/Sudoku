@@ -1,179 +1,157 @@
-// sudoku_generator.js
+// =====================================================
+// GENERATEUR SUDOKU
+// utilise sudoku_solver.js
+// =====================================================
 
-const SUDOKU_SIZE = 9;
-const SUDOKU_BOX = 3;
+function shuffleArray(arr) {
+    const a = arr.slice();
 
-function shuffle(array) {
-    const arr = [...array];
-
-    for (let i = arr.length - 1; i > 0; i--) {
+    for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+        [a[i], a[j]] = [a[j], a[i]];
     }
 
-    return arr;
+    return a;
 }
 
-function createEmptyGrid() {
-    return Array.from({ length: SUDOKU_SIZE }, () =>
-        Array(SUDOKU_SIZE).fill(0)
-    );
-}
+// =====================================================
+// CREATION D'UNE GRILLE COMPLETE
+// =====================================================
 
-function cloneGrid(grid) {
-    return grid.map(row => [...row]);
-}
+function genererGrilleComplete() {
 
-function isValidInGrid(grid, row, col, num) {
-    for (let c = 0; c < SUDOKU_SIZE; c++) {
-        if (grid[row][c] === num) return false;
-    }
+    const grille = Array.from({ length: 9 }, () => Array(9).fill(0));
 
-    for (let r = 0; r < SUDOKU_SIZE; r++) {
-        if (grid[r][col] === num) return false;
-    }
+    function remplir() {
 
-    const startRow = Math.floor(row / SUDOKU_BOX) * SUDOKU_BOX;
-    const startCol = Math.floor(col / SUDOKU_BOX) * SUDOKU_BOX;
+        for (let l = 0; l < 9; l++) {
+            for (let c = 0; c < 9; c++) {
 
-    for (let r = startRow; r < startRow + SUDOKU_BOX; r++) {
-        for (let c = startCol; c < startCol + SUDOKU_BOX; c++) {
-            if (grid[r][c] === num) return false;
-        }
-    }
+                if (grille[l][c] !== 0) continue;
 
-    return true;
-}
+                const chiffres = shuffleArray([1,2,3,4,5,6,7,8,9]);
 
-function fillGrid(grid) {
-    for (let row = 0; row < SUDOKU_SIZE; row++) {
-        for (let col = 0; col < SUDOKU_SIZE; col++) {
-            if (grid[row][col] === 0) {
-                const numbers = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                for (const n of chiffres) {
 
-                for (const num of numbers) {
-                    if (isValidInGrid(grid, row, col, num)) {
-                        grid[row][col] = num;
+                    if (possibleJS(grille, l, c, n)) {
 
-                        if (fillGrid(grid)) {
-                            return true;
-                        }
+                        grille[l][c] = n;
 
-                        grid[row][col] = 0;
+                        if (remplir()) return true;
+
+                        grille[l][c] = 0;
                     }
                 }
 
                 return false;
             }
         }
+
+        return true;
     }
 
-    return true;
+    remplir();
+
+    return grille;
 }
 
-function findEmptyCell(grid) {
-    for (let row = 0; row < SUDOKU_SIZE; row++) {
-        for (let col = 0; col < SUDOKU_SIZE; col++) {
-            if (grid[row][col] === 0) {
-                return { row, col };
-            }
-        }
-    }
+// =====================================================
+// SUPPRESSION DE CASES AVEC UNICITE
+// =====================================================
 
-    return null;
-}
+function retirerCasesAvecUnicite(solution, objectif) {
 
-/**
- * Compte le nombre de solutions d'une grille.
- * S'arrête dès que le nombre atteint "limit".
- */
-function countSolutions(grid, limit = 2) {
-    let count = 0;
-
-    function solve() {
-        if (count >= limit) return;
-
-        const empty = findEmptyCell(grid);
-
-        if (!empty) {
-            count++;
-            return;
-        }
-
-        const { row, col } = empty;
-
-        for (let num = 1; num <= 9; num++) {
-            if (isValidInGrid(grid, row, col, num)) {
-                grid[row][col] = num;
-                solve();
-                grid[row][col] = 0;
-
-                if (count >= limit) return;
-            }
-        }
-    }
-
-    solve();
-    return count;
-}
-
-/**
- * Retire des cases tout en garantissant une solution unique.
- */
-function removeCellsUnique(grid, cellsToRemove) {
-    const puzzle = cloneGrid(grid);
+    const puzzle = copieGrilleJS(solution);
 
     const positions = [];
-    for (let row = 0; row < SUDOKU_SIZE; row++) {
-        for (let col = 0; col < SUDOKU_SIZE; col++) {
-            positions.push({ row, col });
+
+    for (let l = 0; l < 9; l++) {
+        for (let c = 0; c < 9; c++) {
+            positions.push({l,c});
         }
     }
 
-    const shuffledPositions = shuffle(positions);
-    let removed = 0;
+    const ordre = shuffleArray(positions);
 
-    for (const pos of shuffledPositions) {
-        if (removed >= cellsToRemove) break;
+    let retirees = 0;
 
-        const { row, col } = pos;
-        const backup = puzzle[row][col];
+    for (const pos of ordre) {
+
+        if (retirees >= objectif) break;
+
+        const {l,c} = pos;
+
+        const backup = puzzle[l][c];
 
         if (backup === 0) continue;
 
-        puzzle[row][col] = 0;
+        puzzle[l][c] = 0;
 
-        const testGrid = cloneGrid(puzzle);
-        const nbSolutions = countSolutions(testGrid, 2);
+        const nbSolutions = compterSolutionsSudokuJS(puzzle,2);
 
         if (nbSolutions === 1) {
-            removed++;
+            retirees++;
         } else {
-            puzzle[row][col] = backup;
+            puzzle[l][c] = backup;
         }
     }
 
     return puzzle;
 }
 
-function generateSudokuGrid() {
-    const grid = createEmptyGrid();
-    fillGrid(grid);
-    return grid;
-}
+// =====================================================
+// GENERATION SIMPLE
+// =====================================================
 
-/**
- * Génère un sudoku avec solution unique.
- * cellsToRemove est un objectif, pas une garantie absolue :
- * si on ne peut pas retirer plus de cases sans casser l'unicité,
- * la fonction s'arrête avant.
- */
-function generateSudoku(cellsToRemove = 40) {
-    const solution = generateSudokuGrid();
-    const puzzle = removeCellsUnique(solution, cellsToRemove);
+function generateSudoku(cellsToRemove = 45) {
+
+    const solution = genererGrilleComplete();
+
+    const puzzle = retirerCasesAvecUnicite(solution, cellsToRemove);
+
+    const evaluation = evaluerDifficulteSudokuJS(puzzle);
 
     return {
-        puzzle: puzzle,
-        solution: solution
+        puzzle,
+        solution,
+        niveau: evaluation.niveau,
+        stats: evaluation.stats
     };
+}
+
+// =====================================================
+// GENERATION PAR NIVEAU
+// =====================================================
+
+function generateSudokuByLevel(niveauVise, essaisMax = 100) {
+
+    const retraitParNiveau = {
+        facile: 35,
+        moyen: 43,
+        difficile: 50,
+        expert: 55
+    };
+
+    const cellsToRemove = retraitParNiveau[niveauVise] ?? 45;
+
+    for (let essai = 0; essai < essaisMax; essai++) {
+
+        const solution = genererGrilleComplete();
+
+        const puzzle = retirerCasesAvecUnicite(solution, cellsToRemove);
+
+        const evaluation = evaluerDifficulteSudokuJS(puzzle);
+
+        if (evaluation.success && evaluation.niveau === niveauVise) {
+
+            return {
+                puzzle,
+                solution,
+                niveau: evaluation.niveau,
+                stats: evaluation.stats
+            };
+        }
+    }
+
+    return null;
 }

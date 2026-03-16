@@ -1202,6 +1202,8 @@ function afficherStatsSolveur() {
     }
 
     zone.textContent =
+        "Niveau : " + (statsSolveur.niveau ?? "inconnu") + "\n" +
+        "\n" +
         "Singles : " + statsSolveur.single + "\n" +
         "Hidden singles : " + statsSolveur.hidden_single + "\n" +
         "Locked candidates : " + statsSolveur.locked + "\n" +
@@ -1243,12 +1245,14 @@ function resoudreGrille() {
 // =====================================================
 
 function genererNouvellePartie(cellsToRemove = 45) {
+
     const resultat = generateSudoku(cellsToRemove);
-    const puzzle = resultat.puzzle;
-    const solution = resultat.solution;
+
+    const { puzzle, solution, stats } = resultat;
 
     for (let l = 0; l < 9; l++) {
         for (let c = 0; c < 9; c++) {
+
             grille[l][c] = puzzle[l][c];
             grilleCand[l][c] = [];
             grilleFixe[l][c] = (puzzle[l][c] !== 0);
@@ -1257,41 +1261,42 @@ function genererNouvellePartie(cellsToRemove = 45) {
         }
     }
 
-    mode = "jeu";
-    modeCandidat = false;
-    caseSel = null;
-    selectedCells.clear();
-    pileUndo = [];
-
-    drag = false;
-    pointerStartCell = null;
-    dragSelection = false;
-    longPress = false;
-    partieGagnee = false;
-    clearTimeout(pressTimer);
-
-    timerEnPause = false;
-
-    document.getElementById("btnTimer").textContent = "Pause";
-    document.getElementById("btnValider").style.display = "none";
-    document.getElementById("infoMode").style.display = "inline";
-    document.getElementById("btnCandidat").textContent = "Candidats : OFF";
-
-    reinitialiserTimer();
-    demarrerTimer();
-    reinitialiserStatsJeu();
-    statsSolveur = null;
+    statsSolveur = stats;
+    window.solutionCourante = solution;
 
     verifierGrille();
-    mettreAJourClavier();
-    afficherStatsSolveur();
-    afficherStatsJeu();
     dessinerTout();
+    afficherStatsSolveur();
+}
 
-    nomSauvegarde = "sudoku";
-    afficherNomPartie();
+function genererNouvellePartieNiveau(niveau) {
 
+    const resultat = generateSudokuByLevel(niveau, 100);
+
+    if (!resultat) {
+        alert("Impossible de générer ce niveau");
+        return;
+    }
+
+    const { puzzle, solution, stats } = resultat;
+
+    for (let l = 0; l < 9; l++) {
+        for (let c = 0; c < 9; c++) {
+
+            grille[l][c] = puzzle[l][c];
+            grilleCand[l][c] = [];
+            grilleFixe[l][c] = (puzzle[l][c] !== 0);
+            grilleErreur[l][c] = false;
+            grilleCouleur[l][c] = [];
+        }
+    }
+
+    statsSolveur = stats;
     window.solutionCourante = solution;
+
+    verifierGrille();
+    dessinerTout();
+    afficherStatsSolveur();
 }
 
 // =====================================================

@@ -213,7 +213,6 @@ function appliquerLockedCandidatesBlocJS(gr, cands) {
 }
 
 function appliquerLockedCandidatesLigneColonneJS(gr, cands) {
-    // ----- lignes -> bloc -----
     for (let l = 0; l < 9; l++) {
         for (let n = 1; n <= 9; n++) {
             const s = String(n);
@@ -253,7 +252,6 @@ function appliquerLockedCandidatesLigneColonneJS(gr, cands) {
         }
     }
 
-    // ----- colonnes -> bloc -----
     for (let c = 0; c < 9; c++) {
         for (let n = 1; n <= 9; n++) {
             const s = String(n);
@@ -297,7 +295,6 @@ function appliquerLockedCandidatesLigneColonneJS(gr, cands) {
 }
 
 function appliquerNakedPairJS(gr, cands) {
-    // lignes
     for (let l = 0; l < 9; l++) {
         const paires = {};
 
@@ -329,7 +326,6 @@ function appliquerNakedPairJS(gr, cands) {
         }
     }
 
-    // colonnes
     for (let c = 0; c < 9; c++) {
         const paires = {};
 
@@ -579,7 +575,6 @@ function appliquerLogiqueJS(gr, stats) {
         stats.logic_loops += 1;
         stats.iterations_total += 1;
 
-        // 1. Naked single
         const single = trouverSingleJS(gr, cands);
         if (single) {
             gr[single.l][single.c] = single.n;
@@ -589,7 +584,6 @@ function appliquerLogiqueJS(gr, stats) {
             continue;
         }
 
-        // 2. Hidden single
         const hs = trouverHiddenSingleJS(gr, cands);
         if (hs) {
             gr[hs.l][hs.c] = hs.n;
@@ -599,28 +593,24 @@ function appliquerLogiqueJS(gr, stats) {
             continue;
         }
 
-        // 3. Locked candidates bloc -> ligne/colonne
         if (appliquerLockedCandidatesBlocJS(gr, cands)) {
             stats.locked += 1;
             progression = true;
             continue;
         }
 
-        // 4. Locked candidates ligne/colonne -> bloc
         if (appliquerLockedCandidatesLigneColonneJS(gr, cands)) {
             stats.locked += 1;
             progression = true;
             continue;
         }
 
-        // 5. Naked pair
         if (appliquerNakedPairJS(gr, cands)) {
             stats.pair += 1;
             progression = true;
             continue;
         }
 
-        // 6. Hidden pair
         if (appliquerHiddenPairJS(gr, cands)) {
             stats.hidden_pair += 1;
             progression = true;
@@ -629,6 +619,30 @@ function appliquerLogiqueJS(gr, stats) {
     }
 
     return gr;
+}
+
+function evaluerDifficulteDepuisStatsJS(stats) {
+    if (
+        stats.guess === 0 &&
+        stats.locked === 0 &&
+        stats.pair === 0 &&
+        stats.hidden_pair === 0
+    ) {
+        return "facile";
+    }
+
+    if (
+        stats.guess === 0 &&
+        stats.hidden_pair === 0
+    ) {
+        return "moyen";
+    }
+
+    if (stats.guess <= 2) {
+        return "difficile";
+    }
+
+    return "expert";
 }
 
 function solveRecursiveJS(gr, stats) {
@@ -662,24 +676,102 @@ function solveRecursiveJS(gr, stats) {
 
 function resoudreSudokuJS(grilleDepart) {
     const stats = {
-    single: 0,
-    hidden_single: 0,
-    pair: 0,
-    hidden_pair: 0,
-    locked: 0,
-    guess: 0,
-    logic_loops: 0,
-    backtrack_calls: 0,
-    branches_tested: 0,
-    iterations_total: 0
-};
+        niveau: "inconnu",
+        single: 0,
+        hidden_single: 0,
+        pair: 0,
+        hidden_pair: 0,
+        locked: 0,
+        guess: 0,
+        logic_loops: 0,
+        backtrack_calls: 0,
+        branches_tested: 0,
+        iterations_total: 0
+    };
 
     const grilleTravail = copieGrilleJS(grilleDepart);
     const res = solveRecursiveJS(grilleTravail, stats);
+
+    if (res.success) {
+        stats.niveau = evaluerDifficulteDepuisStatsJS(stats);
+    }
 
     return {
         success: res.success,
         solution: res.solution,
         stats
+    };
+}
+
+// =====================================================
+// COMPTAGE DE SOLUTIONS
+// =====================================================
+function trouverCaseMinPourComptageJS(gr) {
+    const cands = creerCandidatsJS(gr);
+    let best = null;
+    let minLen = 10;
+
+    for (let l = 0; l < 9; l++) {
+        for (let c = 0; c < 9; c++) {
+            if (gr[l][c] !== 0) continue;
+
+            const chaine = cands[l][c];
+            const nb = chaine.length;
+
+            if (nb === 0) {
+                return { l, c, cands: "" };
+            }
+
+            if (nb < minLen) {
+                minLen = nb;
+                best = { l, c, cands: chaine };
+                if (nb === 1) return best;
+            }
+        }
+    }
+
+    return best;
+}
+
+function compterSolutionsRecJS(gr, limite, compteur) {
+    if (compteur.count >= limite) return;
+
+    const caseMin = trouverCaseMinPourComptageJS(gr);
+
+    if (!caseMin) {
+        compteur.count += 1;
+        return;
+    }
+
+    if (caseMin.cands.length === 0) {
+        return;
+    }
+
+    for (const ch of caseMin.cands) {
+        gr[caseMin.l][caseMin.c] = Number(ch);
+        compterSolutionsRecJS(gr, limite, compteur);
+        gr[caseMin.l][caseMin.c] = 0;
+
+        if (compteur.count >= limite) return;
+    }
+}
+
+function compterSolutionsSudokuJS(grilleDepart, limite = 2) {
+    const grilleTravail = copieGrilleJS(grilleDepart);
+    const compteur = { count: 0 };
+
+    compterSolutionsRecJS(grilleTravail, limite, compteur);
+
+    return compteur.count;
+}
+
+function evaluerDifficulteSudokuJS(grilleDepart) {
+    const resultat = resoudreSudokuJS(grilleDepart);
+
+    return {
+        success: resultat.success,
+        niveau: resultat.stats.niveau,
+        stats: resultat.stats,
+        solution: resultat.solution
     };
 }

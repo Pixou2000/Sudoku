@@ -21,8 +21,13 @@
     <div class="toolbar-row">
 
       <button onclick="nouvelleGrille()">Grille vide</button>
-      
-      <button onclick="genererNouvellePartie()">Générer</button>
+
+      <button onclick="genererNouvellePartie()">Auto</button>
+
+      <button onclick="genererNouvellePartieNiveau('facile')">Facile</button>
+      <button onclick="genererNouvellePartieNiveau('moyen')">Moyen</button>
+      <button onclick="genererNouvellePartieNiveau('difficile')">Difficile</button>
+      <button onclick="genererNouvellePartieNiveau('expert')">Expert</button>
 
       <button id="btnValider" onclick="validerGrilleDepart()">
         Valider grille
