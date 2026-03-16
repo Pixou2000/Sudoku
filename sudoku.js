@@ -1239,6 +1239,62 @@ function resoudreGrille() {
 }
 
 // =====================================================
+// Generateur
+// =====================================================
+
+function genererNouvellePartie(cellsToRemove = 45) {
+    const resultat = generateSudoku(cellsToRemove);
+    const puzzle = resultat.puzzle;
+    const solution = resultat.solution;
+
+    for (let l = 0; l < 9; l++) {
+        for (let c = 0; c < 9; c++) {
+            grille[l][c] = puzzle[l][c];
+            grilleCand[l][c] = [];
+            grilleFixe[l][c] = (puzzle[l][c] !== 0);
+            grilleErreur[l][c] = false;
+            grilleCouleur[l][c] = [];
+        }
+    }
+
+    mode = "jeu";
+    modeCandidat = false;
+    caseSel = null;
+    selectedCells.clear();
+    pileUndo = [];
+
+    drag = false;
+    pointerStartCell = null;
+    dragSelection = false;
+    longPress = false;
+    partieGagnee = false;
+    clearTimeout(pressTimer);
+
+    timerEnPause = false;
+
+    document.getElementById("btnTimer").textContent = "Pause";
+    document.getElementById("btnValider").style.display = "none";
+    document.getElementById("infoMode").style.display = "inline";
+    document.getElementById("btnCandidat").textContent = "Candidats : OFF";
+
+    reinitialiserTimer();
+    demarrerTimer();
+    reinitialiserStatsJeu();
+    statsSolveur = null;
+
+    verifierGrille();
+    mettreAJourClavier();
+    afficherStatsSolveur();
+    afficherStatsJeu();
+    dessinerTout();
+
+    nomSauvegarde = "sudoku";
+    afficherNomPartie();
+
+    window.solutionCourante = solution;
+}
+
+// =====================================================
 // UNDO
 // =====================================================
 function sauverEtat() {

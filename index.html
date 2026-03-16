@@ -20,7 +20,8 @@
     <!-- Ligne 1 : partie / sauvegarde / minuterie -->
     <div class="toolbar-row">
 
-      <button onclick="nouvelleGrille()">Nouvelle</button>
+      <button onclick="nouvelleGrille()">Grille vide</button>
+      <button onclick="genererNouvellePartie()">Générer</button>
 
       <button id="btnValider" onclick="validerGrilleDepart()">
         Valider grille
@@ -153,6 +154,7 @@
     <pre id="statsSolveur"></pre>
   </div>
 
+  <script src="sudoku_generator.js"></script>
   <script src="sudoku_solver.js"></script>
   <script src="sudoku.js"></script>
 
