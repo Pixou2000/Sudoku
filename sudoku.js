@@ -705,6 +705,10 @@ function nouvelleGrille() {
     longPress = false;
     partieGagnee = false;
     clearTimeout(pressTimer);
+    clearTimeout(tapTimer);
+    tapTimer = null;
+    lastTapTime = 0;
+    lastTapCell = null;
 
     timerEnPause = false;
 
@@ -717,8 +721,10 @@ function nouvelleGrille() {
     dessinerTout();
     reinitialiserTimer();
     reinitialiserStatsJeu();
+
     statsSolveur = null;
     afficherStatsSolveur();
+
     mettreAJourClavier();
 
     nomSauvegarde = "sudoku";
@@ -1257,39 +1263,14 @@ function analyserStatsGrille() {
 // =====================================================
 
 function genererNouvellePartie(cellsToRemove = 45) {
-
     const resultat = generateSudoku(cellsToRemove);
 
-    const { puzzle, solution, stats } = resultat;
-
-    for (let l = 0; l < 9; l++) {
-        for (let c = 0; c < 9; c++) {
-
-            grille[l][c] = puzzle[l][c];
-            grilleCand[l][c] = [];
-            grilleFixe[l][c] = (puzzle[l][c] !== 0);
-            grilleErreur[l][c] = false;
-            grilleCouleur[l][c] = [];
-        }
-    }
-
-    statsSolveur = stats;
-    window.solutionCourante = solution;
-
-    verifierGrille();
-    dessinerTout();
-    afficherStatsSolveur();
-}
-
-function genererNouvellePartieNiveau(niveau) {
-    const resultat = generateSudokuByLevel(niveau, 100);
-
     if (!resultat) {
-        alert("Impossible de générer ce niveau");
+        alert("Impossible de générer une grille");
         return;
     }
 
-    const { puzzle, solution, stats } = resultat;
+    const { puzzle, solution } = resultat;
 
     for (let l = 0; l < 9; l++) {
         for (let c = 0; c < 9; c++) {
@@ -1313,6 +1294,10 @@ function genererNouvellePartieNiveau(niveau) {
     longPress = false;
     partieGagnee = false;
     clearTimeout(pressTimer);
+    clearTimeout(tapTimer);
+    tapTimer = null;
+    lastTapTime = 0;
+    lastTapCell = null;
 
     timerEnPause = false;
 
@@ -1325,12 +1310,75 @@ function genererNouvellePartieNiveau(niveau) {
     demarrerTimer();
     reinitialiserStatsJeu();
 
-    statsSolveur = stats;
+    statsSolveur = null;
+    afficherStatsSolveur();
+
     window.solutionCourante = solution;
 
     verifierGrille();
     mettreAJourClavier();
+    afficherStatsJeu();
+    dessinerTout();
+
+    nomSauvegarde = "sudoku";
+    afficherNomPartie();
+}
+
+function genererNouvellePartieNiveau(niveau) {
+    const resultat = generateSudokuByLevel(niveau, 100);
+
+    if (!resultat) {
+        alert("Impossible de générer ce niveau");
+        return;
+    }
+
+    const { puzzle, solution } = resultat;
+
+    for (let l = 0; l < 9; l++) {
+        for (let c = 0; c < 9; c++) {
+            grille[l][c] = puzzle[l][c];
+            grilleCand[l][c] = [];
+            grilleFixe[l][c] = (puzzle[l][c] !== 0);
+            grilleErreur[l][c] = false;
+            grilleCouleur[l][c] = [];
+        }
+    }
+
+    mode = "jeu";
+    modeCandidat = false;
+    caseSel = null;
+    selectedCells.clear();
+    pileUndo = [];
+
+    drag = false;
+    pointerStartCell = null;
+    dragSelection = false;
+    longPress = false;
+    partieGagnee = false;
+    clearTimeout(pressTimer);
+    clearTimeout(tapTimer);
+    tapTimer = null;
+    lastTapTime = 0;
+    lastTapCell = null;
+
+    timerEnPause = false;
+
+    document.getElementById("btnTimer").textContent = "Pause";
+    document.getElementById("btnValider").style.display = "none";
+    document.getElementById("infoMode").style.display = "inline";
+    document.getElementById("btnCandidat").textContent = "Candidats : OFF";
+
+    reinitialiserTimer();
+    demarrerTimer();
+    reinitialiserStatsJeu();
+
+    statsSolveur = null;
     afficherStatsSolveur();
+
+    window.solutionCourante = solution;
+
+    verifierGrille();
+    mettreAJourClavier();
     afficherStatsJeu();
     dessinerTout();
 
