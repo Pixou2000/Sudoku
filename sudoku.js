@@ -1270,7 +1270,6 @@ function genererNouvellePartie(cellsToRemove = 45) {
 }
 
 function genererNouvellePartieNiveau(niveau) {
-
     const resultat = generateSudokuByLevel(niveau, 100);
 
     if (!resultat) {
@@ -1282,7 +1281,6 @@ function genererNouvellePartieNiveau(niveau) {
 
     for (let l = 0; l < 9; l++) {
         for (let c = 0; c < 9; c++) {
-
             grille[l][c] = puzzle[l][c];
             grilleCand[l][c] = [];
             grilleFixe[l][c] = (puzzle[l][c] !== 0);
@@ -1291,14 +1289,49 @@ function genererNouvellePartieNiveau(niveau) {
         }
     }
 
+    mode = "jeu";
+    modeCandidat = false;
+    caseSel = null;
+    selectedCells.clear();
+    pileUndo = [];
+
+    drag = false;
+    pointerStartCell = null;
+    dragSelection = false;
+    longPress = false;
+    partieGagnee = false;
+    clearTimeout(pressTimer);
+
+    timerEnPause = false;
+
+    document.getElementById("btnTimer").textContent = "Pause";
+    document.getElementById("btnValider").style.display = "none";
+    document.getElementById("infoMode").style.display = "inline";
+    document.getElementById("btnCandidat").textContent = "Candidats : OFF";
+
+    reinitialiserTimer();
+    demarrerTimer();
+    reinitialiserStatsJeu();
+
     statsSolveur = stats;
     window.solutionCourante = solution;
 
     verifierGrille();
-    dessinerTout();
+    mettreAJourClavier();
     afficherStatsSolveur();
+    afficherStatsJeu();
+    dessinerTout();
+
+    nomSauvegarde = "sudoku";
+    afficherNomPartie();
 }
 
+function genererDepuisSelectNiveau() {
+    const select = document.getElementById("niveauGeneration");
+    const niveau = select ? select.value : "moyen";
+
+    genererNouvellePartieNiveau(niveau);
+}
 // =====================================================
 // UNDO
 // =====================================================
