@@ -1226,10 +1226,10 @@ function resoudreGrille() {
 
     /*sauverEtat();
 
-    grille = resultat.solution.map(ligne => ligne.slice());
+    grille = resultat.solution.map(ligne => ligne.slice());*/
     statsSolveur = resultat.stats;
 
-    for (let l = 0; l < 9; l++) {
+   /* for (let l = 0; l < 9; l++) {
         for (let c = 0; c < 9; c++) {
             grilleCand[l][c] = [];
         }
@@ -1237,7 +1237,7 @@ function resoudreGrille() {
 
     verifierGrille();
     dessinerTout();*/
-    
+
     afficherStatsSolveur();
 }
 
