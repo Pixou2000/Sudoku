@@ -1224,7 +1224,7 @@ function resoudreGrille() {
         return;
     }
 
-    sauverEtat();
+    /*sauverEtat();
 
     grille = resultat.solution.map(ligne => ligne.slice());
     statsSolveur = resultat.stats;
@@ -1236,7 +1236,8 @@ function resoudreGrille() {
     }
 
     verifierGrille();
-    dessinerTout();
+    dessinerTout();*/
+    
     afficherStatsSolveur();
 }
 

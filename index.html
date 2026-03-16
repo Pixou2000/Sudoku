@@ -33,6 +33,8 @@
 
     <button onclick="genererDepuisSelectNiveau()">Générer</button>
 
+    <button onclick="resoudreGrille()">Résoudre grille</button>
+
     <!-- Plus tard -->
     <!-- <button onclick="scannerGrille()">Scanner</button> -->
   </div>
@@ -72,10 +74,6 @@
 
     <button onclick="effacerBoutonCands()">Effacer Candidats</button>
 
-    <button id="btnCandidat" onclick="toggleModeCandidat()">
-      Candidats : OFF
-    </button>
-
     <button onclick="creerCandidatsSelection()">
       Cands sélection
     </button>
@@ -92,7 +90,6 @@
       Effacer couleur
     </button>
 
-    <button onclick="resoudreGrille()">Résoudre grille</button>
   </div>
 
   <!-- Ligne 4 : couleurs -->
@@ -103,15 +100,6 @@
         type="color"
         value="#808080"
         onchange="couleurCandidat=this.value;dessinerTout()"
-      >
-    </label>
-
-    <label>
-      Couleur sélection
-      <input
-        type="color"
-        value="#ffc8c8"
-        onchange="couleurSelection=this.value;dessinerTout()"
       >
     </label>
 
