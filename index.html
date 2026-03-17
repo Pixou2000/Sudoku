@@ -50,6 +50,8 @@
 
     <button onclick="sauverPartie()">Save</button>
 
+    <button id="btnCandidat" onclick="toggleModeCandidat()"> Candidats : OFF </button>
+
     <button onclick="document.getElementById('fileLoader').click()">
       Load
     </button>
@@ -93,6 +95,8 @@
       Effacer couleur
     </button>
 
+    
+
   </div>
 
   <!-- Ligne 4 : couleurs -->
@@ -114,6 +118,14 @@
         onchange="couleurCellule=this.value"
       >
     </label>
+
+    <label>
+     Couleur sélection
+    <input type="color"
+    value="#ffc8c8"
+    onchange="couleurSelection=this.value;dessinerTout()"
+    >
+   </label>
   </div>
 
   <!-- Ligne 5 : infos -->

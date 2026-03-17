@@ -6,7 +6,8 @@ const ctx = canvas.getContext("2d");
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v0.1.1 ";
+const VERSION_APP = "v0.1.2 ";
+//v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 
 let tailleCell;
 
