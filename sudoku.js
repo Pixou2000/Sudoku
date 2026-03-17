@@ -6,8 +6,9 @@ const ctx = canvas.getContext("2d");
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v0.1.2 ";
+const VERSION_APP = "v0.2.0 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
+//v0.2.0: ajout de fonction aide avec fenêtre popup
 
 let tailleCell;
 
@@ -91,6 +92,21 @@ function afficherVersionApp() {
         zone.textContent = VERSION_APP;
     }
 }
+
+function ouvrirAide() {
+    document.getElementById("fenetreAide").style.display = "flex";
+}
+
+function fermerAide() {
+    document.getElementById("fenetreAide").style.display = "none";
+}
+
+window.addEventListener("click", function (e) {
+    const modal = document.getElementById("fenetreAide");
+    if (e.target === modal) {
+        fermerAide();
+    }
+});
 
 // =====================================================
 // DESSIN

@@ -13,10 +13,14 @@
 
 <body>
 
-  <h1>
-  Sudoku
-  <span id="versionApp" class="version-app"></span>
-  </h1> 
+  <div class="header-top">
+    <h1>
+      Sudoku
+      <span id="versionApp" class="version-app"></span>
+    </h1>
+
+    <button class="btn-aide-top" onclick="ouvrirAide()">Aide</button>
+  </div>
 
   <div id="toolbar">
 
@@ -141,7 +145,7 @@
     <button id="btnTimer" onclick="toggleTimer()">Pause</button>
   </div>
 
-</div>
+  </div>
 
   <br>
 
@@ -174,6 +178,56 @@
   <script src="sudoku_generator.js"></script>
   <script src="sudoku_solver.js"></script>
   <script src="sudoku.js"></script>
+
+  <div id="fenetreAide" class="modal-aide" style="display:none;">
+  <div class="modal-aide-contenu">
+    <div class="modal-aide-header">
+      <h2>Sudoku — Aide</h2>
+      <button class="btn-fermer-aide" onclick="fermerAide()">✕</button>
+    </div>
+
+    <div class="modal-aide-body">
+      <p><strong>Version :</strong> 0.1.0</p>
+
+      <h3>Principe</h3>
+      <p>
+        Le but est de compléter la grille de 9×9 avec les chiffres de 1 à 9,
+        sans répétition dans une ligne, une colonne ou un bloc 3×3.
+      </p>
+
+      <h3>Démarrage</h3>
+      <ul>
+        <li><strong>Grille vide</strong> : crée une grille vide à remplir manuellement.</li>
+        <li><strong>Générer</strong> : crée une nouvelle grille automatique selon le niveau choisi.</li>
+        <li><strong>Valider grille</strong> : passe du mode préparation au mode jeu.</li>
+      </ul>
+
+      <h3>Mode jeu</h3>
+      <ul>
+        <li><strong>Candidats : OFF / ON</strong> : active ou désactive la saisie des candidats.</li>
+        <li><strong>Cands sélection</strong> : crée les candidats pour les cellules sélectionnées.</li>
+        <li><strong>Tous cands</strong> : crée les candidats pour toute la grille.</li>
+        <li><strong>Stats grille</strong> : analyse la grille et affiche son niveau et ses statistiques sans modifier la partie.</li>
+        <li><strong>Undo</strong> : annule la dernière action.</li>
+        <li><strong>Effacer</strong> : efface les chiffres des cellules sélectionnées.</li>
+        <li><strong>Effacer Candidats</strong> : efface seulement les candidats.</li>
+      </ul>
+
+      <h3>Sélection</h3>
+      <ul>
+        <li>Clic : sélection d’une cellule.</li>
+        <li>Glisser : sélection rectangulaire de plusieurs cellules.</li>
+        <li>Double clic / double tap : sélection des mêmes valeurs et candidats associés.</li>
+      </ul>
+
+      <h3>Sauvegarde</h3>
+      <ul>
+        <li><strong>Save</strong> : exporte la partie en fichier JSON.</li>
+        <li><strong>Load</strong> : recharge une partie sauvegardée.</li>
+      </ul>
+    </div>
+  </div>
+  </div>
 
 </body>
 </html>
