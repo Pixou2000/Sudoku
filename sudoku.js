@@ -1213,7 +1213,14 @@ function effacerCouleurSelection() {
 
     cellules.forEach(({ l, c }) => {
         if (grilleFixe[l][c]) return;
-        grilleCouleur[l][c] = [];
+
+        // efface la couleur de la cellule
+        grilleCouleur[l][c] = null;
+
+        // remet les candidats de la cellule à la couleur par défaut
+        grilleCand[l][c].forEach(cand => {
+            cand.c = couleurCandidat;
+        });
     });
 
     dessinerTout();
