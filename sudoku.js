@@ -7,7 +7,7 @@ const COULEUR_CANDIDAT_DEFAUT = "grey";
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v0.2.2 ";
+const VERSION_APP = "v0.2.3 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 //v0.2.0: ajout de fonction aide avec fenêtre popup
 //v0.2.2: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
@@ -43,7 +43,7 @@ let statsJeu = null;
 let partieGagnee = false;
 let autoSaveAvantQuit = true;
 
-let nomSauvegarde = "sudoku";
+let nomSauvegarde = "20260323-";
 const VERSION_SAUVEGARDE = 1;
 
 let grilleCouleur = Array.from({ length: 9 }, () =>
@@ -400,15 +400,22 @@ function sauverPartie() {
         arreterTimer();
     }
 
-    let nom = prompt("Nom de la sauvegarde :", nomSauvegarde);
+let nomParDefaut = nomSauvegarde;
 
-    if (!nom) {
-        if (timerEtaitActif) demarrerTimer();
-        return;
-    }
+// si c’est la première sauvegarde (nom encore "sudoku")
+if (nomSauvegarde === "sudoku") {
+    nomParDefaut = dateFormatSauvegarde();
+}
 
-    nomSauvegarde = nom;
-    afficherNomPartie();
+    let nom = prompt("Nom de la sauvegarde :", nomParDefaut);
+
+        if (!nom) {
+            if (timerEtaitActif) demarrerTimer();
+            return;
+        }
+
+        nomSauvegarde = nom;
+        afficherNomPartie();
 
     const data = construireDonneesSauvegarde();
 
@@ -640,6 +647,16 @@ function quitterPartie() {
     } catch (err) {
         console.error(err);
     }
+}
+
+function dateFormatSauvegarde() {
+    const d = new Date();
+
+    const annee = d.getFullYear();
+    const mois = String(d.getMonth() + 1).padStart(2, "0");
+    const jour = String(d.getDate()).padStart(2, "0");
+
+    return `${annee}${mois}${jour}-`;
 }
 
 // =====================================================
