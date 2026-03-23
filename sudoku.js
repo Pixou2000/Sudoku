@@ -3,13 +3,14 @@
 // =====================================================
 const canvas = document.getElementById("sudokuCanvas");
 const ctx = canvas.getContext("2d");
+const COULEUR_CANDIDAT_DEFAUT = "grey";
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v0.2.1 ";
+const VERSION_APP = "v0.2.2 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 //v0.2.0: ajout de fonction aide avec fenêtre popup
-//v0.2.1: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
+//v0.2.2: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
 
 let tailleCell;
 
@@ -1220,7 +1221,7 @@ function effacerCouleurSelection() {
 
         // remet les candidats de la cellule à la couleur par défaut
         grilleCand[l][c].forEach(cand => {
-            cand.c = couleurCandidat;
+            cand.c = COULEUR_CANDIDAT_DEFAUT;
         });
     });
 
