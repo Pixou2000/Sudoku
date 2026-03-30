@@ -7,10 +7,11 @@ const COULEUR_CANDIDAT_DEFAUT = "grey";
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v0.2.3 ";
+const VERSION_APP = "v0.2.4 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 //v0.2.0: ajout de fonction aide avec fenêtre popup
 //v0.2.2: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
+//v0.2.4: Modifier taille des chiffres (de 30px à 45px)
 
 let tailleCell;
 
@@ -198,18 +199,18 @@ function dessinerChiffres() {
 
                 if (!estValidePlacement(l, c, n)) {
                     ctx.fillStyle = "red";
-                    ctx.font = "40px Arial";
+                    ctx.font = "45px Arial";
                 } else {
                     if (mode === "preparation") {
                         ctx.fillStyle = "blue";
-                        ctx.font = "40px Arial";
+                        ctx.font = "45px Arial";
                     } else if (mode === "jeu") {
                         if (grilleFixe[l][c]) {
                             ctx.fillStyle = "black";
-                            ctx.font = "40px Arial";
+                            ctx.font = "45px Arial";
                         } else {
                             ctx.fillStyle = "grey";
-                            ctx.font = "34px 'Patrick Hand'";
+                            ctx.font = "50px 'Patrick Hand'";
                         }
                     }
                 }
