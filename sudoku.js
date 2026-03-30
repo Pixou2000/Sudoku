@@ -198,15 +198,15 @@ function dessinerChiffres() {
 
                 if (!estValidePlacement(l, c, n)) {
                     ctx.fillStyle = "red";
-                    ctx.font = "30px Arial";
+                    ctx.font = "40px Arial";
                 } else {
                     if (mode === "preparation") {
                         ctx.fillStyle = "blue";
-                        ctx.font = "30px Arial";
+                        ctx.font = "40px Arial";
                     } else if (mode === "jeu") {
                         if (grilleFixe[l][c]) {
                             ctx.fillStyle = "black";
-                            ctx.font = "30px Arial";
+                            ctx.font = "40px Arial";
                         } else {
                             ctx.fillStyle = "grey";
                             ctx.font = "34px 'Patrick Hand'";
