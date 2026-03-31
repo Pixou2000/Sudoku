@@ -144,6 +144,14 @@ function generateSudokuByLevel(niveauVise, essaisMax) {
 
         const evaluation = evaluerDifficulteSudokuJS(puzzle);
 
+        if (essai % 10 === 0) {
+            document.getElementById("statsSolveur").textContent =
+                `Essai ${essai + 1}/${essaisMax}
+        Niveau visé : ${niveauVise}
+        Niveau obtenu : ${evaluation.niveau}
+        Guess : ${evaluation.stats.guess}`;
+        }        
+
         if (evaluation.success && evaluation.niveau === niveauVise) {
             return {
                 puzzle,
