@@ -123,15 +123,19 @@ function generateSudoku(cellsToRemove = 45) {
 // GENERATION PAR NIVEAU
 // =====================================================
 
-function generateSudokuByLevel(niveauVise, essaisMax = 400) {
-    const retraitsParNiveau = {
+function generateSudokuByLevel(niveauVise, essaisMax) {
+    const retraitParNiveau = {
         facile: [32, 33, 34, 35, 36, 37, 38],
         moyen: [37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
         difficile: [44, 45, 46, 47, 48, 49, 50, 51],
         expert: [50, 51, 52, 53, 54, 55]
     };
 
-    const retraits = retraitsParNiveau[niveauVise] ?? [45];
+    const retraits = retraitParNiveau[niveauVise] ?? [45];
+
+    if (essaisMax === undefined) {
+        essaisMax = (niveauVise === "moyen") ? 1000 : 100;
+    }
 
     for (let essai = 0; essai < essaisMax; essai++) {
         const solution = genererGrilleComplete();

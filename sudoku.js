@@ -7,11 +7,12 @@ const COULEUR_CANDIDAT_DEFAUT = "grey";
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v0.2.4 ";
+const VERSION_APP = "v0.3.0 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 //v0.2.0: ajout de fonction aide avec fenêtre popup
 //v0.2.2: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
 //v0.2.4: Modifier taille des chiffres (de 30px à 45px)
+//v0.3.0: Modification generateur de Sudoku pour passer à 1000 essais en Moyen, 100 pour les autres vs. 400 pour tous
 
 let tailleCell;
 
@@ -1385,7 +1386,7 @@ function genererNouvellePartie(cellsToRemove = 45) {
 }
 
 function genererNouvellePartieNiveau(niveau) {
-    const resultat = generateSudokuByLevel(niveau, 100);
+    const resultat = generateSudokuByLevel(niveau);
 
     if (!resultat) {
         alert("Impossible de générer ce niveau");
