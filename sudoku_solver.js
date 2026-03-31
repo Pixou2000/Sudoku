@@ -881,7 +881,7 @@ function compterSolutionsSudokuJS(grilleDepart, limite = 2) {
 }
 
 function evaluerDifficulteSudokuJS(grilleDepart) {
-    const resultat = resoudreSudokuMoyenneJS(grille);
+    const resultat = resoudreSudokuJS(grille);
 
     return {
         success: resultat.success,
