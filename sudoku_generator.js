@@ -126,7 +126,7 @@ function generateSudoku(cellsToRemove = 45) {
 function generateSudokuByLevel(niveauVise, essaisMax) {
     const retraitParNiveau = {
         facile: [32, 33, 34, 35, 36, 37, 38],
-        moyen: [37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
+        moyen: [42, 43, 44, 42, 43, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46],
         difficile: [44, 45, 46, 47, 48, 49, 50, 51],
         expert: [50, 51, 52, 53, 54, 55]
     };

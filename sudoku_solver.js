@@ -1,6 +1,13 @@
 // =====================================================
+// PARAMETRES
+// =====================================================
+
+const NB_TIRAGES_STATS = 20;
+
+// =====================================================
 // SOLVEUR PUR JS
 // =====================================================
+
 function copieGrilleJS(gr) {
     return gr.map(ligne => ligne.slice());
 }
@@ -545,25 +552,49 @@ function appliquerHiddenPairJS(gr, cands) {
     return false;
 }
 
-function trouverCaseMinJS(gr) {
+function melangerTableauJS(tab) {
+    const copie = [...tab];
+
+    for (let i = copie.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copie[i], copie[j]] = [copie[j], copie[i]];
+    }
+
+    return copie;
+}
+
+function trouverCaseMinJS(gr, aleatoire = false) {
     const cands = creerCandidatsJS(gr);
-    let best = null;
+
     let minLen = 10;
+    let meilleures = [];
 
     for (let l = 0; l < 9; l++) {
         for (let c = 0; c < 9; c++) {
             if (gr[l][c] !== 0) continue;
 
-            const nb = cands[l][c].length;
-            if (nb > 1 && nb < minLen) {
+            const chaine = cands[l][c];
+            const nb = chaine.length;
+
+            if (nb <= 1) continue;
+
+            if (nb < minLen) {
                 minLen = nb;
-                best = { l, c, cands: cands[l][c] };
-                if (nb === 2) return best;
+                meilleures = [{ l, c, cands: chaine }];
+            } else if (nb === minLen) {
+                meilleures.push({ l, c, cands: chaine });
             }
         }
     }
 
-    return best;
+    if (meilleures.length === 0) return null;
+
+    if (!aleatoire || meilleures.length === 1) {
+        return meilleures[0];
+    }
+
+    const index = Math.floor(Math.random() * meilleures.length);
+    return meilleures[index];
 }
 
 function appliquerLogiqueJS(gr, stats) {
@@ -646,7 +677,7 @@ function evaluerDifficulteDepuisStatsJS(stats) {
     return "expert";
 }
 
-function solveRecursiveJS(gr, stats) {
+function solveRecursiveJS(gr, stats, aleatoire = false) {
     stats.backtrack_calls += 1;
     stats.iterations_total += 1;
 
@@ -656,20 +687,31 @@ function solveRecursiveJS(gr, stats) {
         return { success: true, solution: gr };
     }
 
-    const caseMin = trouverCaseMinJS(gr);
+    const caseMin = trouverCaseMinJS(gr, aleatoire);
+
     if (!caseMin) {
         return { success: false, solution: gr };
     }
 
-    for (const ch of caseMin.cands) {
-        stats.guess += 1;
+    stats.guess += 1;
+
+    let candidats = caseMin.cands.split("");
+
+    if (aleatoire) {
+        candidats = melangerTableauJS(candidats);
+    }
+
+    for (const ch of candidats) {
         stats.branches_tested += 1;
 
         const copie = copieGrilleJS(gr);
         copie[caseMin.l][caseMin.c] = Number(ch);
 
-        const res = solveRecursiveJS(copie, stats);
-        if (res.success) return res;
+        const res = solveRecursiveJS(copie, stats, aleatoire);
+
+        if (res.success) {
+            return res;
+        }
     }
 
     return { success: false, solution: gr };
@@ -700,6 +742,77 @@ function resoudreSudokuJS(grilleDepart) {
     return {
         success: res.success,
         solution: res.solution,
+        stats
+    };
+}
+
+function resoudreSudokuMoyenneJS(grilleDepart, essais = NB_TIRAGES_STATS) {
+    const total = {
+        single: 0,
+        hidden_single: 0,
+        pair: 0,
+        hidden_pair: 0,
+        locked: 0,
+        guess: 0,
+        logic_loops: 0,
+        backtrack_calls: 0,
+        branches_tested: 0,
+        iterations_total: 0
+    };
+
+    let succes = 0;
+    let solution = null;
+
+    for (let i = 0; i < essais; i++) {
+        const resultat = resoudreSudokuJS(grilleDepart, true);
+
+        if (!resultat.success) continue;
+
+        succes += 1;
+        solution = resultat.solution;
+
+        total.single += resultat.stats.single;
+        total.hidden_single += resultat.stats.hidden_single;
+        total.pair += resultat.stats.pair;
+        total.hidden_pair += resultat.stats.hidden_pair;
+        total.locked += resultat.stats.locked;
+        total.guess += resultat.stats.guess;
+        total.logic_loops += resultat.stats.logic_loops;
+        total.backtrack_calls += resultat.stats.backtrack_calls;
+        total.branches_tested += resultat.stats.branches_tested;
+        total.iterations_total += resultat.stats.iterations_total;
+    }
+
+    if (succes === 0) {
+        return {
+            success: false,
+            solution: null,
+            stats: null
+        };
+    }
+
+    const stats = {
+        single: total.single / succes,
+        hidden_single: total.hidden_single / succes,
+        pair: total.pair / succes,
+        hidden_pair: total.hidden_pair / succes,
+        locked: total.locked / succes,
+        guess: total.guess / succes,
+        logic_loops: total.logic_loops / succes,
+        backtrack_calls: total.backtrack_calls / succes,
+        branches_tested: total.branches_tested / succes,
+        iterations_total: total.iterations_total / succes
+    };
+
+    for (const cle of Object.keys(stats)) {
+        stats[cle] = Math.round(stats[cle] * 10) / 10;
+    }
+
+    stats.niveau = evaluerDifficulteDepuisStatsJS(stats);
+
+    return {
+        success: true,
+        solution,
         stats
     };
 }
@@ -767,7 +880,7 @@ function compterSolutionsSudokuJS(grilleDepart, limite = 2) {
 }
 
 function evaluerDifficulteSudokuJS(grilleDepart) {
-    const resultat = resoudreSudokuJS(grilleDepart);
+    const resultat = resoudreSudokuMoyenneJS(grille);
 
     return {
         success: resultat.success,
