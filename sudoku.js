@@ -7,14 +7,14 @@ const COULEUR_CANDIDAT_DEFAUT = "grey";
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v0.4.0 ";
+const VERSION_APP = "v0.5.0 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 //v0.2.0: ajout de fonction aide avec fenêtre popup
 //v0.2.2: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
 //v0.2.4: Modifier taille des chiffres (de 30px à 45px)
 //v0.3.0: Modification generateur de Sudoku pour passer à 1000 essais en Moyen, 100 pour les autres vs. 400 pour tous
 //v0.4.0: Modification Solveur pour mieux estimer le nombre de guess
-
+//v0.5.0: Modifier taille des chiifres pour etre proportionel à taille grille sinon trop grand sur iphone
 let tailleCell;
 
 // =====================================================
@@ -201,18 +201,22 @@ function dessinerChiffres() {
 
                 if (!estValidePlacement(l, c, n)) {
                     ctx.fillStyle = "red";
-                    ctx.font = "45px Arial";
+                    const taillePolice = Math.floor(tailleCell * 0.7);
+                    ctx.font = `${taillePolice}px Arial`;
                 } else {
                     if (mode === "preparation") {
                         ctx.fillStyle = "blue";
-                        ctx.font = "45px Arial";
+                        const taillePolice = Math.floor(tailleCell * 0.7);
+                        ctx.font = `${taillePolice}px Arial`;
                     } else if (mode === "jeu") {
                         if (grilleFixe[l][c]) {
                             ctx.fillStyle = "black";
-                            ctx.font = "45px Arial";
+                            const taillePolice = Math.floor(tailleCell * 0.7);
+                            ctx.font = `${taillePolice}px Arial`;
                         } else {
                             ctx.fillStyle = "grey";
-                            ctx.font = "50px 'Patrick Hand'";
+                            const taillePolice = Math.floor(tailleCell * 0.72);
+                            ctx.font = `${taillePolice}px 'Patrick Hand'`;
                         }
                     }
                 }
