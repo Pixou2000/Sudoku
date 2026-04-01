@@ -241,5 +241,5 @@ function afficherComparaisonFinPartie() {
         texte += "Guesses : pas assez de données";
     }
 
-    setTimeout(() => alert(texte), 100);
+   alert(texte);
 }
