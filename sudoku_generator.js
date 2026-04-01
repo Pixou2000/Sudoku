@@ -134,7 +134,7 @@ function generateSudokuByLevel(niveauVise, essaisMax) {
     const retraits = retraitParNiveau[niveauVise] ?? [45];
 
     if (essaisMax === undefined) {
-        (niveauVise === "moyen") ? 100 : 100;
+        essaisMax = (niveauVise === "moyen") ? 200 : 100;
     }
 
     for (let essai = 0; essai < essaisMax; essai++) {
