@@ -7,7 +7,7 @@ const COULEUR_CANDIDAT_DEFAUT = "grey";
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v0.5.10 ";
+const VERSION_APP = "v0.6.0 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 //v0.2.0: ajout de fonction aide avec fenêtre popup
 //v0.2.2: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
@@ -15,6 +15,8 @@ const VERSION_APP = "v0.5.10 ";
 //v0.3.0: Modification generateur de Sudoku pour passer à 1000 essais en Moyen, 100 pour les autres vs. 400 pour tous
 //v0.4.0: Modification Solveur pour mieux estimer le nombre de guess
 //v0.5.0: Modifier taille des chiifres pour etre proportionel à taille grille sinon trop grand sur iphone
+//v0.6.0: Ajout dans stats de jeu: temps du 1er guess et nb de guess
+
 let tailleCell;
 
 // =====================================================
@@ -42,6 +44,7 @@ let timerEnPause = false;
 
 let statsSolveur = null;
 let statsJeu = null;
+let guessActif = false;
 
 let partieGagnee = false;
 let autoSaveAvantQuit = true;
@@ -474,6 +477,7 @@ function chargerPartie(event) {
                 ...creerStatsJeuParDefaut(),
                 ...(data.statsJeu ?? {})
             };
+            guessActif = false;
             partieGagnee = data.partieGagnee ?? false;
 
             if (data.nom) {
@@ -596,6 +600,7 @@ function chargerAutosaveLocale() {
             ...creerStatsJeuParDefaut(),
             ...(data.statsJeu ?? {})
         };
+        guessActif = false;
 
         partieGagnee = data.partieGagnee ?? false;
 
@@ -1104,6 +1109,7 @@ function touche(n) {
     if (mode === "jeu") {
         if (modeCandidat) {
             const cellules = getCellsSelectionnees();
+            let candidatColorieNonDefaut = false;
 
             cellules.forEach(({ l, c }) => {
                 if (grilleFixe[l][c]) return;
@@ -1115,17 +1121,25 @@ function touche(n) {
                     grilleCand[l][c] = liste.filter(x => x.n !== n);
 
                     if (statsJeu) {
-                    statsJeu.candidats_supprimes_manuel += 1;
+                        statsJeu.candidats_supprimes_manuel += 1;
                     }
                 } else {
                     liste.push({ n: n, c: couleurCandidat });
                     liste.sort((a, b) => a.n - b.n);
 
                     if (statsJeu) {
-                    statsJeu.candidats_ajoutes_manuel += 1;
+                        statsJeu.candidats_ajoutes_manuel += 1;
+                    }
+
+                    if (couleurCandidat !== COULEUR_CANDIDAT_DEFAUT) {
+                        candidatColorieNonDefaut = true;
                     }
                 }
             });
+
+            if (candidatColorieNonDefaut) {
+                enregistrerGuessSiBesoin();
+            }
         } else {
             if (!caseSel) return;
             if (grilleFixe[caseSel.l][caseSel.c]) return;
@@ -1140,6 +1154,7 @@ function touche(n) {
 
         verifierGrille();
         dessinerTout();
+        afficherStatsJeu();
         verifierVictoire();
     }
 }
@@ -1236,20 +1251,29 @@ function ajouterCouleurCellule(l, c, couleur) {
 
 function effacerCouleurSelection() {
     const cellules = getCellsSelectionnees();
+    let aReinitialiseDesCouleursCandidat = false;
 
     cellules.forEach(({ l, c }) => {
         if (grilleFixe[l][c]) return;
 
         // efface la couleur de la cellule
-        grilleCouleur[l][c] = null;
+        grilleCouleur[l][c] = [];
 
         // remet les candidats de la cellule à la couleur par défaut
         grilleCand[l][c].forEach(cand => {
-            cand.c = COULEUR_CANDIDAT_DEFAUT;
+            if (cand.c !== COULEUR_CANDIDAT_DEFAUT) {
+                cand.c = COULEUR_CANDIDAT_DEFAUT;
+                aReinitialiseDesCouleursCandidat = true;
+            }
         });
     });
 
+    if (aReinitialiseDesCouleursCandidat) {
+        guessActif = false;
+    }
+
     dessinerTout();
+    afficherStatsJeu();
 }
 
 function couleurTransparente(hex, alpha = 0.35) {
@@ -1746,6 +1770,9 @@ function creerStatsJeuParDefaut() {
         premier_usage_cands_selection: null,
         premier_usage_tous_cands: null,
 
+        premier_guess: null,
+        nb_guess: 0,
+
         effacements: 0,
         undo: 0
     };
@@ -1753,6 +1780,7 @@ function creerStatsJeuParDefaut() {
 
 function reinitialiserStatsJeu() {
     statsJeu = creerStatsJeuParDefaut();
+    guessActif = false;
     afficherStatsJeu();
 }
 
@@ -1773,6 +1801,10 @@ function afficherStatsJeu() {
         ? "-"
         : formaterTemps(statsJeu.premier_usage_tous_cands);
 
+    const tPremierGuess = statsJeu.premier_guess === null
+        ? "-"
+        : formaterTemps(statsJeu.premier_guess);
+
     zone.textContent =
         "Stats joueur\n" +
         "Chiffres placés : " + statsJeu.chiffres_places + "\n" +
@@ -1786,9 +1818,27 @@ function afficherStatsJeu() {
         "Ajout via Tous cands : " + statsJeu.candidats_ajoutes_tous_cands + "\n" +
         "1er usage Tous cands : " + tTousCands + "\n" +
         "\n" +
+        "Nb guesses : " + statsJeu.nb_guess + "\n" +
+        "1er guess : " + tPremierGuess + "\n" +
+        "\n" +
         "Effacements : " + statsJeu.effacements + "\n" +
         "Undo : " + statsJeu.undo + "\n" +
         "Temps : " + formaterTemps(tempsEcoule);
+}
+
+function enregistrerGuessSiBesoin() {
+    if (!statsJeu) return;
+
+    if (!guessActif) {
+        guessActif = true;
+        statsJeu.nb_guess += 1;
+
+        if (statsJeu.premier_guess === null) {
+            statsJeu.premier_guess = tempsEcoule;
+        }
+
+        afficherStatsJeu();
+    }
 }
 
 // =====================================================
