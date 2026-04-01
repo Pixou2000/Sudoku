@@ -37,6 +37,34 @@ function sauverHistoriqueParties() {
     }
 }
 
+function afficherHistoriqueParties() {
+    if (!historiqueParties || historiqueParties.length === 0) {
+        alert("Historique vide");
+        return;
+    }
+
+    let texte = "Historique des parties\n\n";
+
+    historiqueParties.forEach((p, i) => {
+        texte +=
+            (i + 1) + ". " +
+            (p.niveau || "?") + " - " +
+            formaterTemps(p.temps);
+
+        if (p.nbGuess !== null && p.nbGuess !== undefined) {
+            texte += " - " + p.nbGuess + " guess";
+        }
+
+        if (p.nom) {
+            texte += "\n   " + p.nom;
+        }
+
+        texte += "\n\n";
+    });
+
+    alert(texte);
+}
+
 // -----------------------------------------------------
 // Niveau de la partie en cours
 // -----------------------------------------------------
