@@ -16,6 +16,7 @@ const VERSION_APP = "v0.6.0 ";
 //v0.4.0: Modification Solveur pour mieux estimer le nombre de guess
 //v0.5.0: Modifier taille des chiifres pour etre proportionel à taille grille sinon trop grand sur iphone
 //v0.6.0: Ajout dans stats de jeu: temps du 1er guess et nb de guess
+//v1.0.0: Ajouut de fonction comaraison avec historique
 
 let tailleCell;
 
@@ -486,6 +487,8 @@ function chargerPartie(event) {
                 nomSauvegarde = "sudoku";
             }
             afficherNomPartie();
+            const infoNiveauCharge = extraireInfosNiveauDepuisNom(nomSauvegarde);
+            definirNiveauPartie(infoNiveauCharge.typeNiveau, infoNiveauCharge.niveau);
 
             selectedCells.clear();
             caseSel = null;
@@ -606,6 +609,8 @@ function chargerAutosaveLocale() {
 
         nomSauvegarde = data.nom ?? "sudoku";
         afficherNomPartie();
+        const infoNiveauCharge = extraireInfosNiveauDepuisNom(nomSauvegarde);
+        definirNiveauPartie(infoNiveauCharge.typeNiveau, infoNiveauCharge.niveau);
 
         selectedCells.clear();
         caseSel = null;
@@ -780,6 +785,7 @@ function nouvelleGrille() {
     dessinerTout();
     reinitialiserTimer();
     reinitialiserStatsJeu();
+    reinitialiserInfosHistoriquePartie();
 
     statsSolveur = null;
     afficherStatsSolveur();
@@ -869,7 +875,9 @@ function verifierVictoire() {
     if (grilleCompleteEtValide()) {
         partieGagnee = true;
         arreterTimer();
+        enregistrerPartieTermineeHistorique();
         dessinerTout();
+        afficherComparaisonFinPartie();
     }
 }
 
@@ -1398,6 +1406,12 @@ function genererNouvellePartie(cellsToRemove = 45) {
     reinitialiserTimer();
     demarrerTimer();
     reinitialiserStatsJeu();
+    definirNiveauPartie(
+        "classique",
+        resultat.niveau
+            ? resultat.niveau.charAt(0).toUpperCase() + resultat.niveau.slice(1)
+            : null
+    );
 
     statsSolveur = null;
     afficherStatsSolveur();
@@ -1461,6 +1475,10 @@ function genererNouvellePartieNiveau(niveau) {
     reinitialiserTimer();
     demarrerTimer();
     reinitialiserStatsJeu();
+    definirNiveauPartie(
+        "classique",
+        niveau ? niveau.charAt(0).toUpperCase() + niveau.slice(1) : null
+    );
 
     statsSolveur = null;
     afficherStatsSolveur();
@@ -1856,6 +1874,8 @@ function afficherMode() {
 
 statsJeu = creerStatsJeuParDefaut();
 statsSolveur = null;
+
+chargerHistoriqueParties();
 
 dessinerTout();
 afficherStatsSolveur();
