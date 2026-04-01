@@ -657,25 +657,11 @@ function evaluerDifficulteDepuisStatsJS(stats) {
     const techniquesAvancees =
         stats.locked + stats.pair + stats.hidden_pair;
 
-    if (
-        stats.guess === 0 &&
-        techniquesAvancees === 0
-    ) {
-        return "facile";
-    }
-
-    if (
-        stats.guess === 0 &&
-        techniquesAvancees > 0
-    ) {
-        return "moyen";
-    }
-
-    if (stats.guess <= 2) {
-        return "difficile";
-    }
-
-    return "expert";
+    if (stats.guess > 2) return "expert";
+    if (stats.guess > 0) return "difficile";
+    if (techniquesAvancees > 0) return "moyen";
+    if (stats.logic_loops <= 35) return "facile";
+    return "moyen";
 }
 
 function solveRecursiveJS(gr, stats, aleatoire = false) {

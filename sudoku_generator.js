@@ -146,11 +146,18 @@ function generateSudokuByLevel(niveauVise, essaisMax) {
 
         if (essai % 10 === 0) {
             document.getElementById("statsSolveur").textContent =
-                `Essai ${essai + 1}/${essaisMax}
-        Niveau visé : ${niveauVise}
-        Niveau obtenu : ${evaluation.niveau}
-        Guess : ${evaluation.stats.guess}`;
-        }        
+            `Essai ${essai + 1}/${essaisMax}
+            Niveau visé : ${niveauVise}
+            Retraits : ${cellsToRemove}
+            Niveau obtenu : ${evaluation.niveau}
+            Guess : ${evaluation.stats.guess}
+            Logic loops : ${evaluation.stats.logic_loops}
+            Singles : ${evaluation.stats.single}
+            Hidden singles : ${evaluation.stats.hidden_single}
+            Locked : ${evaluation.stats.locked}
+            Pair : ${evaluation.stats.pair}
+            Hidden pair : ${evaluation.stats.hidden_pair}`;
+        }
 
         if (evaluation.success && evaluation.niveau === niveauVise) {
             return {
