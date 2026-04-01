@@ -80,6 +80,17 @@ function definirNiveauPartie(typeNiveau, niveau) {
     partieHistoriqueEnregistree = false;
 }
 
+function effacerHistoriqueParties() {
+    if (!confirm("Effacer tout l'historique des parties ?")) {
+        return;
+    }
+
+    historiqueParties = [];
+    sauverHistoriqueParties();
+
+    alert("Historique effacé");
+}
+
 // -----------------------------------------------------
 // Détection niveau depuis le nom
 // -----------------------------------------------------
@@ -90,7 +101,7 @@ function extraireInfosNiveauDepuisNom(nom) {
 
     const texte = nom.trim();
 
-    const matchN = texte.match(/\bN\s*(1[0-5]|[5-9])\b/i);
+    const matchN = texte.match(/n\s*(1[0-5]|[5-9])(?!\d)/i);
     if (matchN) {
         return {
             typeNiveau: "sport_cerebral",
