@@ -60,6 +60,10 @@
       Load
     </button>
 
+    <button onclick="ouvrirImportHistorique()">
+      Import historique
+    </button>
+
     <button onclick="quitterPartie()">Quit</button>
 
     <input
@@ -68,6 +72,14 @@
       accept=".json"
       style="display:none"
       onchange="chargerPartie(event)"
+    >
+
+    <input
+      type="file"
+      id="importHistorique"
+      accept=".json"
+      multiple
+      style="display:none"
     >
 
     <span id="nomPartie" style="margin-left:15px; font-weight:bold;">
@@ -178,6 +190,7 @@
   <script src="sudoku_generator.js"></script>
   <script src="sudoku_solver.js"></script>
   <script src="sudoku_history.js"></script>
+  <script src="sudoku_history_import.js"></script>
   <script src="sudoku.js"></script>
 
   <div id="fenetreAide" class="modal-aide" style="display:none;">
