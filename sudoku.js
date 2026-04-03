@@ -7,7 +7,7 @@ const COULEUR_CANDIDAT_DEFAUT = "grey";
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v1.0.4 ";
+const VERSION_APP = "v1.0.5 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 //v0.2.0: ajout de fonction aide avec fenêtre popup
 //v0.2.2: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
@@ -19,6 +19,8 @@ const VERSION_APP = "v1.0.4 ";
 //v1.0.2: Ajout de fonction comparaison avec historique
 //v1.0.3: Historique modifié pour pour inclure date fin des parties
 //v1.0.4: Historique: ajout d'une analyse de toutes las parties avec le Solveur pour mieux comparer les niveaux
+//v1.0.5: Correction mineure sur affichage historique
+
 let tailleCell;
 
 // =====================================================

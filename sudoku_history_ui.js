@@ -123,7 +123,12 @@ function rafraichirHistoriqueModal() {
             (typeof p.nbGuess === "number") ? p.nbGuess : "-",
             (typeof p.premierGuess === "number") ? formaterTemps(p.premierGuess) : "-",
             (typeof p.undo === "number") ? p.undo : "-",
-            (typeof p.effacements === "number") ? p.effacements : "-"
+            (typeof p.effacements === "number") ? p.effacements : "-",
+            p.niveauSolveur || "-",
+            (typeof p.guessSolveur === "number") ? p.guessSolveur : "-",
+            (typeof p.logicLoopsSolveur === "number") ? p.logicLoopsSolveur : "-",
+            (typeof p.branchesSolveur === "number") ? p.branchesSolveur : "-",
+            p.sourceAnalyseSolveur || "-"
         ];
 
         cellules.forEach((val, index) => {
@@ -131,7 +136,7 @@ function rafraichirHistoriqueModal() {
             td.textContent = val;
             td.style.padding = "6px";
             td.style.borderBottom = "1px solid #eee";
-            td.style.textAlign = index >= 4 ? "right" : "left";
+            td.style.textAlign = [4, 5, 6, 7, 8, 10, 11, 12].includes(index) ? "right" : "left";
             tr.appendChild(td);
         });
 
@@ -181,7 +186,12 @@ function exporterHistoriqueCSV() {
         "premier_guess_mmss",
         "chiffres_places",
         "undo",
-        "effacements"
+        "effacements",
+        "niveau_solveur",
+        "guess_solveur",
+        "logic_loops_solveur",
+        "branches_solveur",
+        "source_analyse_solveur"
     ].join(";"));
 
     historiqueParties.forEach(p => {
@@ -197,7 +207,12 @@ function exporterHistoriqueCSV() {
             echapperCSV(typeof p.premierGuess === "number" ? formaterTemps(p.premierGuess) : ""),
             echapperCSV(typeof p.chiffresPlaces === "number" ? p.chiffresPlaces : ""),
             echapperCSV(typeof p.undo === "number" ? p.undo : ""),
-            echapperCSV(typeof p.effacements === "number" ? p.effacements : "")
+            echapperCSV(typeof p.effacements === "number" ? p.effacements : ""),
+            echapperCSV(p.niveauSolveur || ""),
+            echapperCSV(typeof p.guessSolveur === "number" ? p.guessSolveur : ""),
+            echapperCSV(typeof p.logicLoopsSolveur === "number" ? p.logicLoopsSolveur : ""),
+            echapperCSV(typeof p.branchesSolveur === "number" ? p.branchesSolveur : ""),
+            echapperCSV(p.sourceAnalyseSolveur || "")
         ].join(";"));
     });
 
