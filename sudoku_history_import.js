@@ -2,13 +2,9 @@
 // IMPORT D'HISTORIQUE DEPUIS DES SAUVEGARDES JSON
 // =====================================================
 
-function construireEntreeHistoriqueDepuisSauvegarde(data, nomFichier = "") {
+function construireEntreeHistoriqueDepuisSauvegarde(data, nomFichier = "", dateFichier = null) {
     if (!data || typeof data !== "object") return null;
 
-    const dateFichier = file.lastModified
-        ? new Date(file.lastModified).toISOString()
-        : new Date().toISOString();    
-    
     const nom = (typeof data.nom === "string" && data.nom.trim() !== "")
         ? data.nom.trim()
         : nomFichier.replace(/\.json$/i, "").trim();
@@ -46,7 +42,7 @@ function construireEntreeHistoriqueDepuisSauvegarde(data, nomFichier = "") {
 
     return {
         id: "import_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
-        date: dateFichier,
+        date: dateFichier ?? new Date().toISOString(),
         nom: nom,
         typeNiveau: infoNiveau.typeNiveau,
         niveau: infoNiveau.niveau,
@@ -84,7 +80,16 @@ function importerHistoriqueDepuisFichiers(event) {
         reader.onload = function (e) {
             try {
                 const data = JSON.parse(e.target.result);
-                const entree = construireEntreeHistoriqueDepuisSauvegarde(data, file.name);
+
+                const dateFichier = file.lastModified
+                    ? new Date(file.lastModified).toISOString()
+                    : new Date().toISOString();
+
+                const entree = construireEntreeHistoriqueDepuisSauvegarde(
+                    data,
+                    file.name,
+                    dateFichier
+                );
 
                 if (!entree) {
                     ignores += 1;
