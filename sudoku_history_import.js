@@ -5,6 +5,10 @@
 function construireEntreeHistoriqueDepuisSauvegarde(data, nomFichier = "") {
     if (!data || typeof data !== "object") return null;
 
+    const dateFichier = file.lastModified
+        ? new Date(file.lastModified).toISOString()
+        : new Date().toISOString();    
+    
     const nom = (typeof data.nom === "string" && data.nom.trim() !== "")
         ? data.nom.trim()
         : nomFichier.replace(/\.json$/i, "").trim();
@@ -42,7 +46,7 @@ function construireEntreeHistoriqueDepuisSauvegarde(data, nomFichier = "") {
 
     return {
         id: "import_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
-        date: new Date().toISOString(),
+        date: dateFichier,
         nom: nom,
         typeNiveau: infoNiveau.typeNiveau,
         niveau: infoNiveau.niveau,

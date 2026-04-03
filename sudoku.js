@@ -7,7 +7,7 @@ const COULEUR_CANDIDAT_DEFAUT = "grey";
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v1.0.2 ";
+const VERSION_APP = "v1.0.3 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 //v0.2.0: ajout de fonction aide avec fenêtre popup
 //v0.2.2: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
@@ -16,7 +16,8 @@ const VERSION_APP = "v1.0.2 ";
 //v0.4.0: Modification Solveur pour mieux estimer le nombre de guess
 //v0.5.0: Modifier taille des chiifres pour etre proportionel à taille grille sinon trop grand sur iphone
 //v0.6.0: Ajout dans stats de jeu: temps du 1er guess et nb de guess
-//v1.0.0: Ajout de fonction comaraison avec historique
+//v1.0.2: Ajout de fonction comparaison avec historique
+//v1.0.3: historique modifié pour pour inclure date fin des parties
 
 let tailleCell;
 
