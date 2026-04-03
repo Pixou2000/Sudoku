@@ -127,8 +127,7 @@ function rafraichirHistoriqueModal() {
             p.niveauSolveur || "-",
             (typeof p.guessSolveur === "number") ? p.guessSolveur : "-",
             (typeof p.logicLoopsSolveur === "number") ? p.logicLoopsSolveur : "-",
-            (typeof p.branchesSolveur === "number") ? p.branchesSolveur : "-",
-            p.sourceAnalyseSolveur || "-"
+            (typeof p.branchesSolveur === "number") ? p.branchesSolveur : "-"
         ];
 
         cellules.forEach((val, index) => {
@@ -190,8 +189,7 @@ function exporterHistoriqueCSV() {
         "niveau_solveur",
         "guess_solveur",
         "logic_loops_solveur",
-        "branches_solveur",
-        "source_analyse_solveur"
+        "branches_solveur"
     ].join(";"));
 
     historiqueParties.forEach(p => {
@@ -211,8 +209,7 @@ function exporterHistoriqueCSV() {
             echapperCSV(p.niveauSolveur || ""),
             echapperCSV(typeof p.guessSolveur === "number" ? p.guessSolveur : ""),
             echapperCSV(typeof p.logicLoopsSolveur === "number" ? p.logicLoopsSolveur : ""),
-            echapperCSV(typeof p.branchesSolveur === "number" ? p.branchesSolveur : ""),
-            echapperCSV(p.sourceAnalyseSolveur || "")
+            echapperCSV(typeof p.branchesSolveur === "number" ? p.branchesSolveur : "")
         ].join(";"));
     });
 
