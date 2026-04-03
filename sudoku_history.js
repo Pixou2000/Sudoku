@@ -65,6 +65,48 @@ function afficherHistoriqueParties() {
     alert(texte);
 }
 
+function reconstruireGrilleDepartDepuisGrilleFixe(grille, grilleFixe) {
+    if (!Array.isArray(grille) || !Array.isArray(grilleFixe)) {
+        return null;
+    }
+
+    const grilleDepart = Array.from({ length: 9 }, () => Array(9).fill(0));
+
+    for (let l = 0; l < 9; l++) {
+        for (let c = 0; c < 9; c++) {
+            if (grilleFixe[l] && grilleFixe[l][c] === true) {
+                grilleDepart[l][c] = grille[l]?.[c] ?? 0;
+            }
+        }
+    }
+
+    return grilleDepart;
+}
+
+function analyserGrilleDepartPourHistorique(grille, grilleFixe) {
+    const grilleDepart = reconstruireGrilleDepartDepuisGrilleFixe(grille, grilleFixe);
+
+    if (!grilleDepart) {
+        return {
+            niveauSolveur: null,
+            guessSolveur: null,
+            logicLoopsSolveur: null,
+            branchesSolveur: null,
+            sourceAnalyseSolveur: null
+        };
+    }
+
+    const resultat = resoudreSudokuJS(grilleDepart);
+
+    return {
+        niveauSolveur: resultat?.stats?.niveau ?? null,
+        guessSolveur: resultat?.stats?.guess ?? null,
+        logicLoopsSolveur: resultat?.stats?.logic_loops ?? null,
+        branchesSolveur: resultat?.stats?.branches_tested ?? null,
+        sourceAnalyseSolveur: "grilleFixe"
+    };
+}
+
 // -----------------------------------------------------
 // Niveau de la partie en cours
 // -----------------------------------------------------
@@ -121,6 +163,10 @@ function extraireInfosNiveauDepuisNom(nom) {
 
     if (bas.includes("difficile")) {
         return { typeNiveau: "classique", niveau: "Difficile" };
+    }
+
+    if (bas.includes("diabolique")) {
+        return { typeNiveau: "classique", niveau: "Diabolique" };
     }
 
     if (bas.includes("expert")) {
@@ -204,7 +250,8 @@ function enregistrerPartieTermineeHistorique() {
         typeNiveau = info.typeNiveau;
         niveau = info.niveau;
     }
-
+    const analyseSolveur = analyserGrilleDepartPourHistorique(grille, grilleFixe);
+    
     const entree = {
         id: "p_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
         date: new Date().toISOString(),
@@ -220,7 +267,13 @@ function enregistrerPartieTermineeHistorique() {
             : null,
         chiffresPlaces: statsJeu?.chiffres_places ?? 0,
         undo: statsJeu?.undo ?? 0,
-        effacements: statsJeu?.effacements ?? 0
+        effacements: statsJeu?.effacements ?? 0,
+
+        niveauSolveur: analyseSolveur.niveauSolveur,
+        guessSolveur: analyseSolveur.guessSolveur,
+        logicLoopsSolveur: analyseSolveur.logicLoopsSolveur,
+        branchesSolveur: analyseSolveur.branchesSolveur,
+        sourceAnalyseSolveur: analyseSolveur.sourceAnalyseSolveur,        
     };
 
     historiqueParties.push(entree);

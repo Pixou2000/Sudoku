@@ -35,6 +35,8 @@ function construireEntreeHistoriqueDepuisSauvegarde(data, nomFichier = "", dateF
         ? stats.effacements
         : 0;
 
+    const analyseSolveur = analyserGrilleDepartPourHistorique(data.grille, data.grilleFixe);        
+
     // On exige au minimum un nom et un temps exploitable
     if (!nom || temps === null) {
         return null;
@@ -51,7 +53,12 @@ function construireEntreeHistoriqueDepuisSauvegarde(data, nomFichier = "", dateF
         premierGuess: premierGuess,
         chiffresPlaces: chiffresPlaces,
         undo: undo,
-        effacements: effacements
+        effacements: effacements,
+        niveauSolveur: analyseSolveur.niveauSolveur,
+        guessSolveur: analyseSolveur.guessSolveur,
+        logicLoopsSolveur: analyseSolveur.logicLoopsSolveur,
+        branchesSolveur: analyseSolveur.branchesSolveur,
+        sourceAnalyseSolveur: analyseSolveur.sourceAnalyseSolveur        
     };
 }
 
