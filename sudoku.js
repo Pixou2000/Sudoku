@@ -7,7 +7,7 @@ const COULEUR_CANDIDAT_DEFAUT = "grey";
 function focusGrille() {
     canvas.focus();
 }
-const VERSION_APP = "v1.0.6 ";
+const VERSION_APP = "v1.0.7 ";
 //v0.1.2: remis les bouttons Cands ON/OFF et Couleur Selection dans HTML
 //v0.2.0: ajout de fonction aide avec fenêtre popup
 //v0.2.2: Effacer couleur, efface aussi couleur des candidats des cellules selectionnées
@@ -21,7 +21,7 @@ const VERSION_APP = "v1.0.6 ";
 //v1.0.4: Historique: ajout d'une analyse de toutes las parties avec le Solveur pour mieux comparer les niveaux
 //v1.0.5: Correction affichage historique
 //v1.0.6: Correction mineure sur affichage historique
-
+//v1.0.7: Verification solution unique avant de valider la grille de départ
 let tailleCell;
 
 // =====================================================
@@ -1017,6 +1017,72 @@ function estValidePlacement(l, c, n) {
     return true;
 }
 
+function compterSolutions(grilleTest, limite = 2) {
+    let nb = 0;
+
+    function chercher() {
+        if (nb >= limite) return;
+
+        let meilleureCase = null;
+        let meilleursCandidats = null;
+
+        for (let l = 0; l < 9; l++) {
+            for (let c = 0; c < 9; c++) {
+                if (grilleTest[l][c] === 0) {
+                    let candidats = [];
+
+                    for (let n = 1; n <= 9; n++) {
+                        if (estValidePlacementDansGrille(grilleTest, l, c, n)) {
+                            candidats.push(n);
+                        }
+                    }
+
+                    if (candidats.length === 0) return;
+
+                    if (meilleursCandidats === null || candidats.length < meilleursCandidats.length) {
+                        meilleureCase = { l, c };
+                        meilleursCandidats = candidats;
+                    }
+                }
+            }
+        }
+
+        if (meilleureCase === null) {
+            nb++;
+            return;
+        }
+
+        for (let n of meilleursCandidats) {
+            grilleTest[meilleureCase.l][meilleureCase.c] = n;
+            chercher();
+            grilleTest[meilleureCase.l][meilleureCase.c] = 0;
+
+            if (nb >= limite) return;
+        }
+    }
+
+    chercher();
+    return nb;
+}
+
+function estValidePlacementDansGrille(g, l, c, n) {
+    for (let i = 0; i < 9; i++) {
+        if (i !== c && g[l][i] === n) return false;
+        if (i !== l && g[i][c] === n) return false;
+    }
+
+    let l0 = Math.floor(l / 3) * 3;
+    let c0 = Math.floor(c / 3) * 3;
+
+    for (let i = l0; i < l0 + 3; i++) {
+        for (let j = c0; j < c0 + 3; j++) {
+            if ((i !== l || j !== c) && g[i][j] === n) return false;
+        }
+    }
+
+    return true;
+}
+
 function validerGrilleDepart() {
     if (mode === "jeu") {
         return false;
@@ -1036,6 +1102,21 @@ function validerGrilleDepart() {
 
     if (!ok) {
         alert("La grille de départ contient des erreurs.");
+        dessinerTout();
+        return false;
+    }
+
+    let copieGrille = grille.map(ligne => ligne.slice());
+    let nbSolutions = compterSolutions(copieGrille, 2);
+
+    if (nbSolutions === 0) {
+        alert("La grille de départ est impossible : aucune solution.");
+        dessinerTout();
+        return false;
+    }
+
+    if (nbSolutions > 1) {
+        alert("La grille de départ est ambiguë : plusieurs solutions possibles.");
         dessinerTout();
         return false;
     }
